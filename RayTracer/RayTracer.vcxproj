@@ -1,0 +1,130 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{AA9B42B0-926C-4382-8F60-C5F1215B345C}</ProjectGuid>
+    <RootNamespace>RayTracer</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>E:\C++\Libraries\SFML\include;E:\C++\Libraries\glew-1.10.0\include;$(IncludePath)</IncludePath>
+    <LibraryPath>E:\C++\Libraries\SFML\lib;E:\C++\Libraries\glew-1.10.0\lib\Release\Win32;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IncludePath>E:\C++\Libraries\SFML\include;E:\C++\Libraries\glew-1.10.0\include;$(IncludePath)</IncludePath>
+    <LibraryPath>E:\C++\Libraries\SFML\lib;E:\C++\Libraries\glew-1.10.0\lib\Release\Win32;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>glew32.lib;glu32.lib;opengl32.lib;sfml-graphics-d.lib;sfml-system-d.lib;sfml-window-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>glew32.lib;glu32.lib;opengl32.lib;sfml-graphics.lib;sfml-system.lib;sfml-window.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="BasicMath.cpp" />
+    <ClCompile Include="Boxes.cpp" />
+    <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="FastRand.cpp" />
+    <ClCompile Include="GeometricMath.cpp" />
+    <ClCompile Include="Interval.cpp" />
+    <ClCompile Include="Lighting.cpp" />
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Material.cpp" />
+    <ClCompile Include="Matrix4f.cpp" />
+    <ClCompile Include="MovingCamera.cpp" />
+    <ClCompile Include="OpenGLIncludes.cpp" />
+    <ClCompile Include="Quaternion.cpp" />
+    <ClCompile Include="RayTracerWorld.cpp" />
+    <ClCompile Include="RenderDataHandler.cpp" />
+    <ClCompile Include="RenderSettings.cpp" />
+    <ClCompile Include="SFMLOpenGLWorld.cpp" />
+    <ClCompile Include="SFMLWorld.cpp" />
+    <ClCompile Include="ShaderHandler.cpp" />
+    <ClCompile Include="TextureManipulator.cpp" />
+    <ClCompile Include="ThreeDShapes.cpp" />
+    <ClCompile Include="TransformObject.cpp" />
+    <ClCompile Include="Vectors.cpp" />
+    <ClCompile Include="Vertices.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="BasicMath.h" />
+    <ClInclude Include="Boxes.h" />
+    <ClInclude Include="Camera.h" />
+    <ClInclude Include="Fake2DArray.h" />
+    <ClInclude Include="FastRand.h" />
+    <ClInclude Include="GeometricMath.h" />
+    <ClInclude Include="Interval.h" />
+    <ClInclude Include="Lighting.h" />
+    <ClInclude Include="Material.h" />
+    <ClInclude Include="Matrix4f.h" />
+    <ClInclude Include="MovingCamera.h" />
+    <ClInclude Include="OpenGLIncludes.h" />
+    <ClInclude Include="ProjectionInfo.h" />
+    <ClInclude Include="Quaternion.h" />
+    <ClInclude Include="RayTracerWorld.h" />
+    <ClInclude Include="RenderDataHandler.h" />
+    <ClInclude Include="RenderInfo.h" />
+    <ClInclude Include="RenderSettings.h" />
+    <ClInclude Include="SFMLOpenGLWorld.h" />
+    <ClInclude Include="SFMLWorld.h" />
+    <ClInclude Include="ShaderHandler.h" />
+    <ClInclude Include="TextureManipulator.h" />
+    <ClInclude Include="ThreeDShapes.h" />
+    <ClInclude Include="TransformObject.h" />
+    <ClInclude Include="Vectors.h" />
+    <ClInclude Include="Vertices.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

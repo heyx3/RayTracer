@@ -1,0 +1,177 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="BasicMath.cpp">
+      <Filter>Math\Basic Math</Filter>
+    </ClCompile>
+    <ClCompile Include="FastRand.cpp">
+      <Filter>Math\Basic Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Interval.cpp">
+      <Filter>Math\Basic Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Matrix4f.cpp">
+      <Filter>Math\Basic Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Quaternion.cpp">
+      <Filter>Math\Basic Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Vectors.cpp">
+      <Filter>Math\Basic Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Math\Higher Math</Filter>
+    </ClCompile>
+    <ClCompile Include="TransformObject.cpp">
+      <Filter>Math\Higher Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Boxes.cpp">
+      <Filter>Math\Shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="ThreeDShapes.cpp">
+      <Filter>Math\Shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="GeometricMath.cpp">
+      <Filter>Math\Shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="OpenGLIncludes.cpp">
+      <Filter>OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="Vertices.cpp">
+      <Filter>OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="MovingCamera.cpp">
+      <Filter>OpenGL\SFML</Filter>
+    </ClCompile>
+    <ClCompile Include="SFMLOpenGLWorld.cpp">
+      <Filter>OpenGL\SFML</Filter>
+    </ClCompile>
+    <ClCompile Include="SFMLWorld.cpp">
+      <Filter>OpenGL\SFML</Filter>
+    </ClCompile>
+    <ClCompile Include="Material.cpp">
+      <Filter>OpenGL\Materials</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderDataHandler.cpp">
+      <Filter>OpenGL\Static Classes</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderSettings.cpp">
+      <Filter>OpenGL\Static Classes</Filter>
+    </ClCompile>
+    <ClCompile Include="ShaderHandler.cpp">
+      <Filter>OpenGL\Static Classes</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureManipulator.cpp">
+      <Filter>OpenGL\Static Classes</Filter>
+    </ClCompile>
+    <ClCompile Include="Lighting.cpp">
+      <Filter>Math\Higher Math</Filter>
+    </ClCompile>
+    <ClCompile Include="RayTracerWorld.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Math">
+      <UniqueIdentifier>{c0f467db-53c3-4f1b-a334-fbafbdda4246}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Math\Basic Math">
+      <UniqueIdentifier>{bfafb019-925d-4f29-895b-1d3d525a86d2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Math\Higher Math">
+      <UniqueIdentifier>{fd954a06-7cc8-421d-aec3-37d3843356b0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Math\Shapes">
+      <UniqueIdentifier>{2ff2e157-518a-4efa-85ca-0cc8f1476a51}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="OpenGL">
+      <UniqueIdentifier>{2d933e90-2073-431c-b4c4-68d322e85ddb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="OpenGL\SFML">
+      <UniqueIdentifier>{54a577b8-f933-47a5-b19d-e53f5de5028d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="OpenGL\Materials">
+      <UniqueIdentifier>{5eae9286-5efc-4aba-a421-209b5f772022}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="OpenGL\Static Classes">
+      <UniqueIdentifier>{844f92b4-9312-4e54-90c1-6923268d02cd}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="BasicMath.h">
+      <Filter>Math\Basic Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Fake2DArray.h">
+      <Filter>Math\Basic Math</Filter>
+    </ClInclude>
+    <ClInclude Include="FastRand.h">
+      <Filter>Math\Basic Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Interval.h">
+      <Filter>Math\Basic Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Matrix4f.h">
+      <Filter>Math\Basic Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Quaternion.h">
+      <Filter>Math\Basic Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Vectors.h">
+      <Filter>Math\Basic Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>Math\Higher Math</Filter>
+    </ClInclude>
+    <ClInclude Include="ProjectionInfo.h">
+      <Filter>Math\Higher Math</Filter>
+    </ClInclude>
+    <ClInclude Include="TransformObject.h">
+      <Filter>Math\Higher Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Boxes.h">
+      <Filter>Math\Shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="ThreeDShapes.h">
+      <Filter>Math\Shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="GeometricMath.h">
+      <Filter>Math\Shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenGLIncludes.h">
+      <Filter>OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="Vertices.h">
+      <Filter>OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="MovingCamera.h">
+      <Filter>OpenGL\SFML</Filter>
+    </ClInclude>
+    <ClInclude Include="SFMLOpenGLWorld.h">
+      <Filter>OpenGL\SFML</Filter>
+    </ClInclude>
+    <ClInclude Include="SFMLWorld.h">
+      <Filter>OpenGL\SFML</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderInfo.h">
+      <Filter>OpenGL\SFML</Filter>
+    </ClInclude>
+    <ClInclude Include="Material.h">
+      <Filter>OpenGL\Materials</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderDataHandler.h">
+      <Filter>OpenGL\Static Classes</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderSettings.h">
+      <Filter>OpenGL\Static Classes</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderHandler.h">
+      <Filter>OpenGL\Static Classes</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureManipulator.h">
+      <Filter>OpenGL\Static Classes</Filter>
+    </ClInclude>
+    <ClInclude Include="Lighting.h">
+      <Filter>Math\Higher Math</Filter>
+    </ClInclude>
+    <ClInclude Include="RayTracerWorld.h" />
+  </ItemGroup>
+</Project>
