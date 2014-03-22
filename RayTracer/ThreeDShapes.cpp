@@ -252,7 +252,17 @@ bool Sphere::TouchingCapsule(const Capsule & capsule) const
 }
 bool Sphere::TouchingPlane(const Plane & plane) const
 {
-	return false;
+    //Get the min/max distances along the plane normal that would make the sphere touch the cube.
+
+    Vector3f dirRad = plane.Normal * Radius;
+    Vector3f min = GetCenter() - dirRad,
+             max = GetCenter() + dirRad;
+    float minDist = min.Dot(plane.Normal),
+          maxDist = max.Dot(plane.Normal);
+
+    float dist = plane.GetCenter().Dot(plane.Normal);
+
+	return dist >= minDist && dist <= maxDist;
 }
 bool Sphere::TouchingTriangle(const Triangle & tris) const
 {
@@ -359,7 +369,17 @@ bool Plane::TouchingCube(const Cube & cube) const
 }
 bool Plane::TouchingSphere(const Sphere & sphere) const
 {
-	return false;
+    //Get the min/max distances along the plane normal that would make the sphere touch the cube.
+
+    Vector3f dirRad = Normal * sphere.Radius;
+    Vector3f min = GetCenter() - dirRad,
+             max = GetCenter() + dirRad;
+    float minDist = min.Dot(Normal),
+          maxDist = max.Dot(Normal);
+
+    float dist = GetCenter().Dot(Normal);
+
+    return dist >= minDist && dist <= maxDist;
 }
 bool Plane::TouchingCapsule(const Capsule & capsule) const
 {
@@ -379,12 +399,14 @@ bool Plane::TouchingTriangle(const Triangle & tris) const
 
 Plane::RayTraceResult Plane::RayHitCheck(Vector3f rayStart, Vector3f rayDir) const
 {
+    //TODO: Finish.
+
 	float dot = BasicMath::Round(rayDir.Dot(Normal), 2);
 
 	//If ray is perpendicular to plane, no intersection.
 	if (dot == 0.0f) return RayTraceResult();
 
-
+    return RayTraceResult(Vector3f());
 }
 
 Box3D Plane::GetBoundingBox(void) const
