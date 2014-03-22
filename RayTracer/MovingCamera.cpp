@@ -1,5 +1,8 @@
 #include "MovingCamera.h"
 
+bool camPaused = false;
+bool pressedLastFrame = false;
+
 bool MovingCamera::Update(float elapsedTime)
 {
 	#pragma region WASD EQ
@@ -47,9 +50,16 @@ bool MovingCamera::Update(float elapsedTime)
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
 	{
-		Window->setMouseCursorVisible(true);
-		return false;
+        if (!pressedLastFrame)
+        {
+            Window->setMouseCursorVisible(true);
+            pressedLastFrame = true;
+            camPaused = !camPaused;
+        }
 	}
+    else pressedLastFrame = false;
+
+    if (camPaused) return false;
 
 	Window->setMouseCursorVisible(false);
 
