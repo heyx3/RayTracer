@@ -109,7 +109,7 @@ public:
 	virtual bool TouchingShape(const Shape & shape) const override { return shape.TouchingSphere(*this); }
 	
 	virtual bool TouchingCube(const Cube & cube) const override;
-	virtual bool TouchingSphere(const Sphere & sphere) const override { return GetCenter().DistanceSquared(sphere.GetCenter()) <= (BasicMath::Square(sphere.Radius) + BasicMath::Square(Radius)); }
+	virtual bool TouchingSphere(const Sphere & sphere) const override { return GetCenter().DistanceSquared(sphere.GetCenter()) <= (BasicMath::Square(sphere.Radius + Radius) + BasicMath::Square(0.0f)); }
 	virtual bool TouchingCapsule(const Capsule & capsule) const override;
     virtual bool TouchingPlane(const Plane & plane) const override;
     virtual bool TouchingTriangle(const Triangle & tri) const override;

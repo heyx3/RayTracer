@@ -28,13 +28,13 @@ void RayTracerWorld::InitializeWorld(void)
 	screenSpr = new sf::Sprite();
 
 	//Create the shapes to ray-trace.
-	shapes.insert(shapes.end(), Object(std::shared_ptr<Shape>(new Cube(Vector3f(), Vector3f(100, 100, 100))), Vector3b(255, 255, 255)));
-    shapes.insert(shapes.end(), Object(std::shared_ptr<Shape>(new Cube(Vector3f(), Vector3f(100, 100, 100))), Vector3b(50, 100, 255)));
+	shapes.insert(shapes.end(), Object(std::shared_ptr<Shape>(new Sphere(Vector3f(), 100)), Vector3b(255, 255, 255)));
+    shapes.insert(shapes.end(), Object(std::shared_ptr<Shape>(new Sphere(Vector3f(50, 50, 50), 25)), Vector3b(50, 100, 255)));
     isShapeTouching.insert(isShapeTouching.end(), false);
     isShapeTouching.insert(isShapeTouching.end(), false);
 
 	//Set up the camera.
-	Vector3f cPos(-20, -20, 2);
+	Vector3f cPos(-100, -100, 100);
 	cam.SetPosition(cPos);
 	cam.SetRotation(-cPos, Vector3f(0, 0, 1), false);
 	cam.Info.FOV = 3.14159f * 0.25f;

@@ -261,18 +261,16 @@ bool Sphere::TouchingTriangle(const Triangle & tris) const
 
 Sphere::RayTraceResult Sphere::RayHitCheck(Vector3f rayStart, Vector3f rayDir) const
 {
-	Vector3f l = rayDir,
-			 cent = GetCenter(),
-			 o = rayStart;
+	Vector3f cent = GetCenter();
 	float r = Radius;
 
-	Vector3f oc = o - cent;
+	Vector3f centerToRayStart = rayStart - cent;
 
-	float a = l.Dot(l),
-		  b = (oc * 2.0f).Dot(l),
-		  c = (oc.Dot(oc)) - BasicMath::Square(r);
+	float rayDirSqr = rayDir.Dot(rayDir),
+		  b = (centerToRayStart * 2.0f).Dot(rayDir),
+		  c = (centerToRayStart.Dot(centerToRayStart)) - BasicMath::Square(r);
 
-	float discriminant = BasicMath::Square(b) - (4.0f * a * c);
+	float discriminant = BasicMath::Square(b) - (4.0f * rayDirSqr * c);
 
 	//No roots.
 	if (discriminant < 0.0f)
@@ -281,7 +279,7 @@ Sphere::RayTraceResult Sphere::RayHitCheck(Vector3f rayStart, Vector3f rayDir) c
 	}
 	else
 	{
-		float denom = 1.0f / (2.0f * a);
+		float denom = 1.0f / (2.0f * rayDirSqr);
 		float t;
 		
 		//One root.
