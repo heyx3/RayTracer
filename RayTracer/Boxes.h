@@ -70,10 +70,8 @@ public:
 	float GetYMin(void) const { return y; }
 	float GetYMax(void) const { return y + height; }
 
-	Vector2f GetTopLeft(void) const { return Vector2f(GetXMin(), GetYMin()); }
-	Vector2f GetTopRight(void) const { return Vector2f(GetXMax(), GetYMin()); }
-	Vector2f GetBottomLeft(void) const { return Vector2f(GetXMin(), GetYMax()); }
-	Vector2f GetBottomRight(void) const { return Vector2f(GetXMax(), GetYMax()); }
+	Vector2f GetMinCorner(void) const { return Vector2f(GetXMin(), GetYMin()); }
+	Vector2f GetMaxCorner(void) const { return Vector2f(GetXMax(), GetYMax()); }
 
 	float GetCenterX(void) const { return x + (width * 0.5f); }
 	float GetCenterY(void) const { return y + (height * 0.5f); }
@@ -110,7 +108,7 @@ public:
 
 	//Makes a rectangle from the given top-front-left corner pos and the given dimensions.
     Box3D(float minX, float minY, float minZ, Vector3f _dimensions)
-        : topLeftFront(Vector3f(minX, minY, minZ)), dimensions(_dimensions)
+        : minCorner(Vector3f(minX, minY, minZ)), dimensions(_dimensions)
     {
         dimensions = Vector3f(BasicMath::Abs(dimensions.x), BasicMath::Abs(dimensions.y), BasicMath::Abs(dimensions.z));
     }
@@ -151,8 +149,8 @@ public:
 
 	//Getters/setters.
 
-	void SetCenterOfBox(Vector3f pos) { topLeftFront += (pos - GetCenter()); }
-	void Move(Vector3f amount) { topLeftFront += amount; }
+	void SetCenterOfBox(Vector3f pos) { minCorner += (pos - GetCenter()); }
+	void Move(Vector3f amount) { minCorner += amount; }
 
 	float GetWidth(void) const { return dimensions.x; }
 	float GetHeight(void) const { return dimensions.y; }
@@ -163,25 +161,19 @@ public:
 	void SetDepth(float newDepth) { dimensions.z = newDepth; }
 	void SetDimensions(Vector3f newDimensions) { dimensions = newDimensions; }
 
-	float GetXMin(void) const { return topLeftFront.x; }
-	float GetXMax(void) const { return topLeftFront.x + dimensions.x; }
-	float GetYMin(void) const { return topLeftFront.y; }
-	float GetYMax(void) const { return topLeftFront.y + dimensions.y; }
-	float GetZMin(void) const { return topLeftFront.z; }
-	float GetZMax(void) const { return topLeftFront.z + dimensions.z; }
+	float GetXMin(void) const { return minCorner.x; }
+	float GetXMax(void) const { return minCorner.x + dimensions.x; }
+	float GetYMin(void) const { return minCorner.y; }
+	float GetYMax(void) const { return minCorner.y + dimensions.y; }
+	float GetZMin(void) const { return minCorner.z; }
+	float GetZMax(void) const { return minCorner.z + dimensions.z; }
 
-	Vector3f GetTopLeftFront(void) const { return topLeftFront; }
-	Vector3f GetTopLeftBack(void) const { return Vector3f(topLeftFront.x, topLeftFront.y, topLeftFront.z + dimensions.z); }
-	Vector3f GetTopRightFront(void) const { return Vector3f(topLeftFront.x + dimensions.x, topLeftFront.y, topLeftFront.z); }
-	Vector3f GetTopRightBack(void) const { return Vector3f(topLeftFront.x + dimensions.x, topLeftFront.y, topLeftFront.z + dimensions.z); }
-	Vector3f GetBottomLeftFront(void) const { return Vector3f(topLeftFront.x, topLeftFront.y + dimensions.y, topLeftFront.z); }
-	Vector3f GetBottomLeftBack(void) const { return Vector3f(topLeftFront.x, topLeftFront.y + dimensions.y, topLeftFront.z + dimensions.z); }
-	Vector3f GetBottomRightFront(void) const { return Vector3f(topLeftFront.x + dimensions.x, topLeftFront.y + dimensions.y, topLeftFront.z); }
-	Vector3f GetBottomRightBack(void) const { return Vector3f(topLeftFront.x + dimensions.x, topLeftFront.y + dimensions.y, topLeftFront.z + dimensions.z); }
+	Vector3f GetMinCorner(void) const { return minCorner; }
+	Vector3f GetMaxCorner(void) const { return minCorner + dimensions; }
 	
-	float GetCenterX(void) const { return topLeftFront.x + (0.5f * dimensions.x); }
-	float GetCenterY(void) const { return topLeftFront.y + (0.5f * dimensions.y); }
-	float GetCenterZ(void) const { return topLeftFront.z + (0.5f * dimensions.z); }
+	float GetCenterX(void) const { return minCorner.x + (0.5f * dimensions.x); }
+	float GetCenterY(void) const { return minCorner.y + (0.5f * dimensions.y); }
+	float GetCenterZ(void) const { return minCorner.z + (0.5f * dimensions.z); }
 	Vector3f GetCenter(void) const { return Vector3f(GetCenterX(), GetCenterY(), GetCenterZ()); }
 
 	Interval GetXInterval(void) const { return Interval(GetXMin(), GetXMax(), 0.001f, true, true); }
@@ -190,7 +182,7 @@ public:
 
 private:
 
-	Vector3f topLeftFront, dimensions;
+	Vector3f minCorner, dimensions;
 	
 	//Finds if the given floats are within "GeometricError" from each other.
 	static bool WithinError(float f1, float f2) { return BasicMath::Abs(f1 - f2) <= GeometricError; }

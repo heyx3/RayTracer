@@ -31,10 +31,10 @@ bool Box2D::Touches(const Box2D & other) const
 }
 bool Box2D::IsInside(const Box2D & other) const
 {
-	return other.IsPointInside(GetTopLeft()) &&
+	return other.IsPointInside(GetMinCorner()) &&
 		   other.IsPointInside(GetTopRight()) &&
 		   other.IsPointInside(GetBottomLeft()) &&
-		   other.IsPointInside(GetBottomRight());
+		   other.IsPointInside(GetMaxCorner());
 }
 
 bool Box2D::PointTouches(Vector2f point) const
@@ -78,21 +78,21 @@ bool Box3D::FixDimensions()
 
 	if (dimensions.x < 0.0f)
 	{
-		topLeftFront.x += dimensions.x;
+		minCorner.x += dimensions.x;
 		dimensions.x = -dimensions.x;
 		neededFixing = true;
 	}
 
 	if (dimensions.y < 0.0f)
 	{
-		topLeftFront.y += dimensions.y;
+		minCorner.y += dimensions.y;
 		dimensions.y = -dimensions.y;
 		neededFixing = true;
 	}
 
 	if (dimensions.z < 0.0f)
 	{
-		topLeftFront.z += dimensions.z;
+		minCorner.z += dimensions.z;
 		dimensions.z = -dimensions.z;
 		neededFixing = true;
 	}
@@ -108,14 +108,14 @@ bool Box3D::Touches(const Box3D & other) const
 }
 bool Box3D::IsInside(const Box3D & other) const
 {
-	return other.IsPointInside(GetTopLeftFront()) &&
+	return other.IsPointInside(GetMinCorner()) &&
 		   other.IsPointInside(GetTopRightFront()) &&
 		   other.IsPointInside(GetBottomLeftFront()) &&
 		   other.IsPointInside(GetBottomRightFront()) &&
 		   other.IsPointInside(GetTopLeftBack()) &&
 		   other.IsPointInside(GetTopRightBack()) &&
 		   other.IsPointInside(GetBottomLeftBack()) &&
-		   other.IsPointInside(GetBottomRightBack());
+		   other.IsPointInside(GetMaxCorner());
 }
 
 bool Box3D::PointTouches(Vector3f point) const
@@ -151,9 +151,9 @@ bool Box3D::IsPointOnFace(Vector3f point) const
 
 bool Box3D::IsEqual(const Box3D & other) const
 {
-	return WithinError(topLeftFront.x, other.topLeftFront.x) &&
-		   WithinError(topLeftFront.y, other.topLeftFront.y) &&
-		   WithinError(topLeftFront.z, other.topLeftFront.z) &&
+	return WithinError(minCorner.x, other.minCorner.x) &&
+		   WithinError(minCorner.y, other.minCorner.y) &&
+		   WithinError(minCorner.z, other.minCorner.z) &&
 		   WithinError(dimensions.x, other.dimensions.x) &&
 		   WithinError(dimensions.y, other.dimensions.y) &&
 		   WithinError(dimensions.z, other.dimensions.z);

@@ -52,6 +52,8 @@ public:
 	virtual void SetCenter(Vector3f newCenter) { center = newCenter; }
 	Vector3f GetCenter(void) const { return center; }
 
+    virtual bool IsPointInside(Vector3f point) const = 0;
+
     virtual Box3D GetBoundingBox(void) const = 0;
 
 
@@ -83,10 +85,15 @@ public:
 
 	virtual RayTraceResult RayHitCheck(Vector3f rayStart, Vector3f rayDir) const override;
 
-	virtual ShapePtr GetClone(void) const override { return ShapePtr(new Cube(Bounds.GetTopLeftFront(), Bounds.GetDimensions())); }
+	virtual ShapePtr GetClone(void) const override { return ShapePtr(new Cube(Bounds.GetMinCorner(), Bounds.GetDimensions())); }
 	
 	virtual void SetCenter(Vector3f newCenter) override { Shape::SetCenter(newCenter); Bounds.SetCenterOfBox(newCenter); }
-	void SetDimensions(Vector3f dimensions) { Bounds.SetDimensions(dimensions); }
+    void SetDimensions(Vector3f dimensions) { Bounds.SetDimensions(dimensions); }
+
+    virtual bool IsPointInside(Vector3f point) const override
+    {
+        return Bounds.IsPointInside(point);
+    }
 
 	void GetBoundingSphere(Sphere & sOut) const;
 
@@ -114,7 +121,12 @@ public:
     virtual bool TouchingPlane(const Plane & plane) const override;
     virtual bool TouchingTriangle(const Triangle & tri) const override;
 	
-	virtual RayTraceResult RayHitCheck(Vector3f rayStart, Vector3f rayDir) const override;
+    virtual RayTraceResult RayHitCheck(Vector3f rayStart, Vector3f rayDir) const override;
+
+    virtual bool IsPointInside(Vector3f point) const override
+    {
+        return (point.DistanceSquared(GetCenter())) <= (Radius * Radius);
+    }
 
 	virtual ShapePtr GetClone(void) const override { return ShapePtr(new Sphere(GetCenter(), Radius)); }
 
@@ -150,7 +162,13 @@ public:
 	Vector3f GetParallelVector(void) const { return (l2 - l1).Normalized(); }
 	float GetLength(void) const { return l2.Distance(l1) + Radius; }
 	
-	virtual void SetCenter(Vector3f center) override { Translate(center - GetCenter()); }
+    virtual void SetCenter(Vector3f center) override { Translate(center - GetCenter()); }
+
+    virtual bool IsPointInside(Vector3f point) const override
+    {
+        return point.DistanceSquared(GeometricMath::ClosestToLine(l1, l2, point, false)) <=
+               (Radius * Radius);
+    }
 
     virtual ShapePtr GetClone(void) const override { return ShapePtr(new Capsule(l1, l2, Radius)); }
 
@@ -165,11 +183,21 @@ private:
 class Plane : public Shape
 {
 public:
-
+    //TODO: Plane math should reflect the fact that the plane is just the surface, not an endless solid below the surface.
 	Vector3f Normal;
 
     Plane(Vector3f onPlane, Vector3f normal) : Shape(onPlane), Normal(normal) { }
 
+    struct PointOnPlaneInfo { public: Vector3f OnPlane; float Distance; };
+    //Gets the point on this Plane closest to the given point, as well as
+    //   the signed distance from the given point to this plane.
+    PointOnPlaneInfo ClosestPointOnPlane(Vector3f point) const
+    {
+        PointOnPlaneInfo ret;
+        ret.Distance = (GetCenter().Dot(Normal)) - (point.Dot(Normal));
+        ret.OnPlane = point + (Normal * ret.Distance);
+        return ret;
+    }
 
 	virtual bool TouchingShape(const Shape & shape) const override { return shape.TouchingPlane(*this); }
 
@@ -179,7 +207,9 @@ public:
     virtual bool TouchingPlane(const Plane & plane) const override;
     virtual bool TouchingTriangle(const Triangle & tri) const override;
 
-	virtual RayTraceResult RayHitCheck(Vector3f rayStart, Vector3f rayDir) const override;
+    virtual RayTraceResult RayHitCheck(Vector3f rayStart, Vector3f rayDir) const override;
+
+    virtual bool IsPointInside(Vector3f point) const override;
 
     virtual ShapePtr GetClone(void) const override { return ShapePtr(new Plane(GetCenter(), Normal)); }
 
@@ -216,6 +246,8 @@ public:
 
     virtual ShapePtr GetClone(void) const override { return ShapePtr(new Triangle(vertices)); }
 
+    virtual bool IsPointInside(Vector3f point) const override;
+
     virtual void SetCenter(Vector3f newCenter) override
     {
         Vector3f delta = newCenter - GetCenter();
@@ -244,6 +276,8 @@ private:
 
     Vector3f vertices[3];
 };
+
+
 
 //TODO: Polygon stuff currently doesn't take into account the inside of the polygon -- only the surface. Maybe have two polygon classes: SimplePolygon (convex) and ComplexPolygon (concave, made of several SimplePolygons).
 class Polygon : public Shape
@@ -296,6 +330,8 @@ public:
     }
 
     virtual RayTraceResult RayHitCheck(Vector3f rayStart, Vector3f rayDir) const override;
+
+    virtual bool IsPointInside(Vector3f point) const override;
 
     virtual void SetCenter(Vector3f newCenter) override
     {

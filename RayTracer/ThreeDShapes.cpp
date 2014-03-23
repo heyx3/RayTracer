@@ -1,6 +1,6 @@
 #include "ThreeDShapes.h"
 
-//TODO: Test.
+//TODO: Finish testing.
 
 bool Shape::TouchingPolygon(const Polygon & poly) const
 {
@@ -12,8 +12,8 @@ bool Shape::TouchingPolygon(const Polygon & poly) const
 
 bool Cube::TouchingSphere(const Sphere & sphere) const
 {
-	Vector3f s1 = Bounds.GetTopLeftFront(),
-			 s2 = Bounds.GetBottomRightBack(),
+	Vector3f s1 = Bounds.GetMinCorner(),
+			 s2 = Bounds.GetMaxCorner(),
 			 sph = sphere.GetCenter();
 	float distSqr = BasicMath::Square(sphere.Radius);
 
@@ -32,6 +32,10 @@ bool Cube::TouchingCapsule(const Capsule & capsule) const
 }
 bool Cube::TouchingPlane(const Plane & plane) const
 {
+    Plane::PointOnPlaneInfo info = plane.ClosestPointOnPlane(GetCenter());
+
+    //TODO: Finish.
+
 	return false;
 }
 bool Cube::TouchingTriangle(const Triangle & tris) const
@@ -104,8 +108,8 @@ Cube::RayTraceResult Cube::RayHitCheck(Vector3f rayStart, Vector3f rayDir) const
 
 bool Sphere::TouchingCube(const Cube & cube) const
 {
-	Vector3f s1 = cube.GetBounds().GetTopLeftFront(),
-			 s2 = cube.GetBounds().GetBottomRightBack(),
+	Vector3f s1 = cube.GetBounds().GetMinCorner(),
+			 s2 = cube.GetBounds().GetMaxCorner(),
 			 sph = GetCenter();
 	float distSqr = BasicMath::Square(Radius);
 
