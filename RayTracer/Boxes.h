@@ -65,22 +65,22 @@ public:
 	void SetHeight(float newHeight) { height = newHeight; }
 	void SetDimensions(Vector2f newWidthAndHeight) { width = newWidthAndHeight.x; height = newWidthAndHeight.y; }
 
-	float GetLeftSide(void) const { return x; }
-	float GetRightSide(void) const { return x + width; }
-	float GetTopSide(void) const { return y; }
-	float GetBottomSide(void) const { return y + height; }
+	float GetXMin(void) const { return x; }
+	float GetXMax(void) const { return x + width; }
+	float GetYMin(void) const { return y; }
+	float GetYMax(void) const { return y + height; }
 
-	Vector2f GetTopLeft(void) const { return Vector2f(GetLeftSide(), GetTopSide()); }
-	Vector2f GetTopRight(void) const { return Vector2f(GetRightSide(), GetTopSide()); }
-	Vector2f GetBottomLeft(void) const { return Vector2f(GetLeftSide(), GetBottomSide()); }
-	Vector2f GetBottomRight(void) const { return Vector2f(GetRightSide(), GetBottomSide()); }
+	Vector2f GetTopLeft(void) const { return Vector2f(GetXMin(), GetYMin()); }
+	Vector2f GetTopRight(void) const { return Vector2f(GetXMax(), GetYMin()); }
+	Vector2f GetBottomLeft(void) const { return Vector2f(GetXMin(), GetYMax()); }
+	Vector2f GetBottomRight(void) const { return Vector2f(GetXMax(), GetYMax()); }
 
 	float GetCenterX(void) const { return x + (width * 0.5f); }
 	float GetCenterY(void) const { return y + (height * 0.5f); }
 	Vector2f GetCenter(void) const { return Vector2f(GetCenterX(), GetCenterY()); }
 
-	Interval GetXInterval(void) const { return Interval(GetLeftSide(), GetRightSide(), 0.001f, true, true); }
-	Interval GetYInterval(void) const { return Interval(GetTopSide(), GetBottomSide(), 0.001f, true, true); }
+	Interval GetXInterval(void) const { return Interval(GetXMin(), GetXMax(), 0.001f, true, true); }
+	Interval GetYInterval(void) const { return Interval(GetYMin(), GetYMax(), 0.001f, true, true); }
 
 private:
 
@@ -163,12 +163,12 @@ public:
 	void SetDepth(float newDepth) { dimensions.z = newDepth; }
 	void SetDimensions(Vector3f newDimensions) { dimensions = newDimensions; }
 
-	float GetLeftSide(void) const { return topLeftFront.x; }
-	float GetRightSide(void) const { return topLeftFront.x + dimensions.x; }
-	float GetTopSide(void) const { return topLeftFront.y; }
-	float GetBottomSide(void) const { return topLeftFront.y + dimensions.y; }
-	float GetFrontSide(void) const { return topLeftFront.z; }
-	float GetBackSide(void) const { return topLeftFront.z + dimensions.z; }
+	float GetXMin(void) const { return topLeftFront.x; }
+	float GetXMax(void) const { return topLeftFront.x + dimensions.x; }
+	float GetYMin(void) const { return topLeftFront.y; }
+	float GetYMax(void) const { return topLeftFront.y + dimensions.y; }
+	float GetZMin(void) const { return topLeftFront.z; }
+	float GetZMax(void) const { return topLeftFront.z + dimensions.z; }
 
 	Vector3f GetTopLeftFront(void) const { return topLeftFront; }
 	Vector3f GetTopLeftBack(void) const { return Vector3f(topLeftFront.x, topLeftFront.y, topLeftFront.z + dimensions.z); }
@@ -184,9 +184,9 @@ public:
 	float GetCenterZ(void) const { return topLeftFront.z + (0.5f * dimensions.z); }
 	Vector3f GetCenter(void) const { return Vector3f(GetCenterX(), GetCenterY(), GetCenterZ()); }
 
-	Interval GetXInterval(void) const { return Interval(GetLeftSide(), GetRightSide(), 0.001f, true, true); }
-	Interval GetYInterval(void) const { return Interval(GetTopSide(), GetBottomSide(), 0.001f, true, true); }
-	Interval GetZInterval(void) const { return Interval(GetFrontSide(), GetBackSide(), 0.001f, true, true); }
+	Interval GetXInterval(void) const { return Interval(GetXMin(), GetXMax(), 0.001f, true, true); }
+	Interval GetYInterval(void) const { return Interval(GetYMin(), GetYMax(), 0.001f, true, true); }
+	Interval GetZInterval(void) const { return Interval(GetZMin(), GetZMax(), 0.001f, true, true); }
 
 private:
 

@@ -19,6 +19,10 @@ void RayTracerWorld::InitializeWorld(void)
 {
 	SFMLOpenGLWorld::InitializeWorld();
 
+    currentFPSBufferIndex = 0;
+    for (unsigned int i = 0; i < fpsBufferSize; ++i)
+        previousFPS[i] = 0;
+
 	//Set up rendering.
 	OnWindowResized(GetWindow()->getSize().x, GetWindow()->getSize().y);
 	DeleteAndSetToNull(screenTex);
@@ -28,8 +32,8 @@ void RayTracerWorld::InitializeWorld(void)
 	screenSpr = new sf::Sprite();
 
 	//Create the shapes to ray-trace.
-	shapes.insert(shapes.end(), Object(std::shared_ptr<Shape>(new Plane(Vector3f(), Vector3f(1, 1, 1).Normalized())), Vector3b(255, 255, 255)));
-    shapes.insert(shapes.end(), Object(std::shared_ptr<Shape>(new Sphere(Vector3f(50, 50, 50), 100)), Vector3b(50, 100, 255)));
+	shapes.insert(shapes.end(), Object(std::shared_ptr<Shape>(new Cube(Vector3f(), Vector3f(50, 50, 50))), Vector3b(255, 255, 255)));
+    shapes.insert(shapes.end(), Object(std::shared_ptr<Shape>(new Cube(Vector3f(50, 50, 50), Vector3f(50, 50, 50))), Vector3b(50, 100, 255)));
     isShapeTouching.insert(isShapeTouching.end(), false);
     isShapeTouching.insert(isShapeTouching.end(), false);
 
@@ -53,6 +57,10 @@ int sampleSize = 2;
 int centerWeight = 16;
 void RayTracerWorld::UpdateWorld(float elapsedSeconds)
 {
+    previousFPS[currentFPSBufferIndex] = 1.0f / elapsedSeconds;
+    currentFPSBufferIndex = (currentFPSBufferIndex + 1) % fpsBufferSize;
+
+
     for (int i = 0; i < shapes.size(); ++i)
     {
         isShapeTouching[i] = false;
@@ -366,10 +374,13 @@ void RayTracerWorld::RenderWorld(float elapsedSeconds)
 	screenSpr->setTexture(*screenTex, true);
 
 	//Render to the window.
+    float avgFPS = 0.0f;
+    for (unsigned int i = 0; i < fpsBufferSize; ++i) avgFPS += previousFPS[i];
+    avgFPS /= (float)fpsBufferSize;
 	RenderSettings::Clearable toClear[2] = { RenderSettings::Clearable::COLOR, RenderSettings::Clearable::DEPTH };
 	RenderSettings::ClearScreen(toClear, 2);
 	GetWindow()->draw(*screenSpr);
-	sf::Text t(sf::String(std::string("Blurriness: ") + std::to_string(centerWeight) + ";   FPS: " + std::to_string(1.0f / elapsedSeconds)), debugFont, 20);
+	sf::Text t(sf::String(std::string("Blurriness: ") + std::to_string(centerWeight) + ";   FPS: " + std::to_string(avgFPS)), debugFont, 20);
 	t.setColor(sf::Color(128, 128, 128, 255));
 	GetWindow()->draw(t);
 	GetWindow()->display();

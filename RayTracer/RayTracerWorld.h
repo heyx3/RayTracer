@@ -54,5 +54,9 @@ private:
 	DirectionalLight light;
 	float GetLightValue(Vector3f normal, Vector3f surfacePos, Vector3f cameraPos, bool isCenter) const;
 
+    static const unsigned int fpsBufferSize = 20;
+    float previousFPS[fpsBufferSize];
+    unsigned int currentFPSBufferIndex;
+
 	static const Vector3b screenClearColor;
 };

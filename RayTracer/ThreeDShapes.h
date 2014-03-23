@@ -244,6 +244,8 @@ private:
 
     Vector3f vertices[3];
 };
+
+//TODO: Polygon stuff currently doesn't take into account the inside of the polygon -- only the surface. Maybe have two polygon classes: SimplePolygon (convex) and ComplexPolygon (concave, made of several SimplePolygons).
 class Polygon : public Shape
 {
 public:

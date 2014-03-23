@@ -39,23 +39,23 @@ bool Box2D::IsInside(const Box2D & other) const
 
 bool Box2D::PointTouches(Vector2f point) const
 {
-	return (GreaterThanOrEqual(point.x, GetLeftSide()) &&
-			GreaterThanOrEqual(point.y, GetTopSide()) &&
-			LessThanOrEqual(point.x, GetRightSide()) &&
-			LessThanOrEqual(point.y, GetBottomSide()));
+	return (GreaterThanOrEqual(point.x, GetXMin()) &&
+			GreaterThanOrEqual(point.y, GetYMin()) &&
+			LessThanOrEqual(point.x, GetXMax()) &&
+			LessThanOrEqual(point.y, GetYMax()));
 }
 bool Box2D::IsPointInside(Vector2f point) const
 {
-	return (GreaterThan(point.x, GetLeftSide()) &&
-			GreaterThan(point.y, GetTopSide()) &&
-			LessThan(point.x, GetRightSide()) &&
-			LessThan(point.y, GetBottomSide()));
+	return (GreaterThan(point.x, GetXMin()) &&
+			GreaterThan(point.y, GetYMin()) &&
+			LessThan(point.x, GetXMax()) &&
+			LessThan(point.y, GetYMax()));
 }
 bool Box2D::IsPointOnEdge(Vector2f point) const
 {
-	return ((WithinError(GetLeftSide(), point.x) || WithinError(GetRightSide(), point.x)) &&
+	return ((WithinError(GetXMin(), point.x) || WithinError(GetXMax(), point.x)) &&
 			(GetYInterval().Touches(point.y))) ||
-		   ((WithinError(GetTopSide(), point.y) || WithinError(GetBottomSide(), point.y)) &&
+		   ((WithinError(GetYMin(), point.y) || WithinError(GetYMax(), point.y)) &&
 			(GetXInterval().Touches(point.x)));
 }
 
@@ -120,31 +120,31 @@ bool Box3D::IsInside(const Box3D & other) const
 
 bool Box3D::PointTouches(Vector3f point) const
 {
-	return (GreaterThanOrEqual(point.x, GetLeftSide()) &&
-			GreaterThanOrEqual(point.y, GetTopSide()) &&
-			GreaterThanOrEqual(point.z, GetFrontSide()) &&
-			LessThanOrEqual(point.x, GetRightSide()) &&
-			LessThanOrEqual(point.y, GetBottomSide()) &&
-			LessThanOrEqual(point.z, GetBackSide()));
+	return (GreaterThanOrEqual(point.x, GetXMin()) &&
+			GreaterThanOrEqual(point.y, GetYMin()) &&
+			GreaterThanOrEqual(point.z, GetZMin()) &&
+			LessThanOrEqual(point.x, GetXMax()) &&
+			LessThanOrEqual(point.y, GetYMax()) &&
+			LessThanOrEqual(point.z, GetZMax()));
 }
 bool Box3D::IsPointInside(Vector3f point) const
 {
-	return (GreaterThan(point.x, GetLeftSide()) &&
-			GreaterThan(point.y, GetTopSide()) &&
-			GreaterThan(point.z, GetFrontSide()) &&
-			LessThan(point.x, GetRightSide()) &&
-			LessThan(point.y, GetBottomSide()) &&
-			LessThan(point.z, GetBackSide()));
+	return (GreaterThan(point.x, GetXMin()) &&
+			GreaterThan(point.y, GetYMin()) &&
+			GreaterThan(point.z, GetZMin()) &&
+			LessThan(point.x, GetXMax()) &&
+			LessThan(point.y, GetYMax()) &&
+			LessThan(point.z, GetZMax()));
 }
 bool Box3D::IsPointOnFace(Vector3f point) const
 {
-	return ((WithinError(GetLeftSide(), point.x) || WithinError(GetRightSide(), point.x)) &&
+	return ((WithinError(GetXMin(), point.x) || WithinError(GetXMax(), point.x)) &&
 			GetYInterval().Touches(point.y) &&
 			GetZInterval().Touches(point.z)) ||
-		   ((WithinError(GetTopSide(), point.y) || WithinError(GetBottomSide(), point.y)) &&
+		   ((WithinError(GetYMin(), point.y) || WithinError(GetYMax(), point.y)) &&
 			GetXInterval().Touches(point.x) &&
 			GetZInterval().Touches(point.z)) ||
-		   ((WithinError(GetFrontSide(), point.z) || WithinError(GetBackSide(), point.z)) &&
+		   ((WithinError(GetZMin(), point.z) || WithinError(GetZMax(), point.z)) &&
 		    GetXInterval().Touches(point.x) &
 			GetYInterval().Touches(point.y));
 }

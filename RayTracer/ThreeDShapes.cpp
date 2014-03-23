@@ -125,106 +125,64 @@ bool Cube::TouchingTriangle(const Triangle & tris) const
 
 Cube::RayTraceResult Cube::RayHitCheck(Vector3f rayStart, Vector3f rayDir) const
 {
-	//Try each face for a ray hit. Iterate through each dimension (YZ faces, XZ faces, XY faces).
+    typedef GeometricMath::PointOnLineAtValueResult<Vector3f> PointOnFaces;
 
-	typedef GeometricMath::PointOnLineAtValueResult<Vector3f> PointOnFaces;
+    Vector3f center = Bounds.GetCenter();
+    Interval dInts[3] = { Bounds.GetXInterval(), Bounds.GetYInterval(), Bounds.GetZInterval() };
 
-	Vector3f center = Bounds.GetCenter();
-	Interval dInts[3] = { Bounds.GetXInterval(), Bounds.GetYInterval(), Bounds.GetZInterval() };
-	bool bHits[3] = { false, false, false };
-	PointOnFaces hits[3] = { PointOnFaces(Vector3f(), 0.0f), PointOnFaces(Vector3f(), 0.0f), PointOnFaces(Vector3f(), 0.0f) };
-	bool positives[3];
-	int ind1, ind2;
-	//Loop through each dimension -- X, Y, and Z.
-	for (int i = 0; i < 3; ++i)
-	{
-		//Get the other two dimensions.
-		ind1 = (i + 1) % 3;
-		ind2 = (i + 2) % 3;
+    //Get the closest x, y, and z faces. If the vector is pointing parallel to a face, there is no intersection along that face.
+    Vector3f faces((rayDir.x == 0.0f) ?
+                       BasicMath::NaN :
+                       ((rayDir.x > 0.0f) ?
+                           (rayStart.x > Bounds.GetXMin() ? Bounds.GetXMax() : Bounds.GetXMin()) :
+                           (rayStart.x < Bounds.GetXMax() ? Bounds.GetXMin() : Bounds.GetXMax())),
+                   (rayDir.y == 0.0f) ?
+                       BasicMath::NaN :
+                       ((rayDir.y > 0.0f) ?
+                           (rayStart.y > Bounds.GetYMin() ? Bounds.GetYMax() : Bounds.GetYMin()) :
+                           (rayStart.y < Bounds.GetYMax() ? Bounds.GetYMin() : Bounds.GetYMax())),
+                   (rayDir.z == 0.0f) ?
+                       BasicMath::NaN :
+                       ((rayDir.z > 0.0f) ?
+                           (rayStart.z > Bounds.GetZMin() ? Bounds.GetZMax() : Bounds.GetZMin()) :
+                           (rayStart.z < Bounds.GetZMax() ? Bounds.GetZMin() : Bounds.GetZMax())));
 
-		//If the ray has a chance of hitting the face, check for a hit.
-		if (rayDir[i] != 0.0f)
-		{
-			//Start with the closest face.
-			if (rayStart[i] < center[i])
-			{
-				hits[i] = GeometricMath::GetPointOnLineAtValue(rayStart, rayDir, i, dInts[i].GetStart());
-				if (hits[i].t >= 0.0f && dInts[ind1].Touches(hits[i].Point[ind1]) && dInts[ind2].Touches(hits[i].Point[ind2]))
-				{
-					bHits[i] = true;
-					positives[i] = false;
-				}
-				else
-				{
-					hits[i] = GeometricMath::GetPointOnLineAtValue(rayStart, rayDir, i, dInts[i].GetEnd());
-					if (hits[i].t >= 0.0f && dInts[ind1].Touches(hits[i].Point[ind1]) && dInts[ind2].Touches(hits[i].Point[ind2]))
-					{
-						bHits[i] = true;
-						positives[i] = true;
-					}
-				}
-			}
-			else
-			{
-				hits[i] = GeometricMath::GetPointOnLineAtValue(rayStart, rayDir, i, dInts[i].GetEnd());
-				if (hits[i].t >= 0.0f && dInts[ind1].Touches(hits[i].Point[ind1]) && dInts[ind2].Touches(hits[i].Point[ind2]))
-				{
-					bHits[i] = true;
-					positives[i] = true;
-				}
-				else
-				{
-					hits[i] = GeometricMath::GetPointOnLineAtValue(rayStart, rayDir, i, dInts[i].GetStart());
-					if (hits[i].t >= 0.0f && dInts[ind1].Touches(hits[i].Point[ind1]) && dInts[ind2].Touches(hits[i].Point[ind2]))
-					{
-						bHits[i] = true;
-						positives[i] = false;
-					}
-				}
-			}
-		}
-	}
+    //For each face, get the ray's intersection with that face.
+    PointOnFaces faceIntersectData[3] =
+    {
+        (faces.x == BasicMath::NaN ? PointOnFaces(Vector3f(), -1.0f) : GeometricMath::GetPointOnLineAtValue(rayStart, rayDir, 0, faces.x)),
+        (faces.y == BasicMath::NaN ? PointOnFaces(Vector3f(), -1.0f) : GeometricMath::GetPointOnLineAtValue(rayStart, rayDir, 1, faces.y)),
+        (faces.z == BasicMath::NaN ? PointOnFaces(Vector3f(), -1.0f) : GeometricMath::GetPointOnLineAtValue(rayStart, rayDir, 2, faces.z)),
+    };
 
-	//Get the closest ray hit.
-	Vector3f closest;
-	int closestDim;
-	float distSqr;
-	float tempDistSqr;
-	bool foundFirst = false;
-	for (int i = 0; i < 3; ++i)
-	{
-		if (bHits[i])
-		{
-			if (!foundFirst)
-			{
-				foundFirst = true;
-				closest = hits[i].Point;
-				distSqr = closest.DistanceSquared(rayStart);
-				closestDim = i;
-			}
-			else
-			{
-				tempDistSqr = rayStart.DistanceSquared(hits[i].Point);
-				if (tempDistSqr < distSqr)
-				{
-					closest = hits[i].Point;
-					distSqr = tempDistSqr;
-					closestDim = i;
-				}
-			}
-		}
-	}
+    //Get the closest intersection.
+    //Ignore any intersections that are behind the ray start or outside the face's bounds.
+    RayTraceResult res;
+    float closestDistSqr = std::numeric_limits<float>::max();
+    int closestAxis = 0;
+    float tempDistSqre;
+    for (unsigned int axis = 0; axis < 3; ++axis)
+    {
+        if (faceIntersectData[axis].t > 0.0f &&
+            dInts[(axis + 1) % 3].Touches(faceIntersectData[axis].Point[(axis + 1) % 3]) &&
+            dInts[(axis + 2) % 3].Touches(faceIntersectData[axis].Point[(axis + 2) % 3]))
+        {
+            tempDistSqre = rayStart.DistanceSquared(faceIntersectData[axis].Point);
+            if (tempDistSqre < closestDistSqr)
+            {
+                res = RayTraceResult(faceIntersectData[axis].Point, Vector3f());
+                closestDistSqr = tempDistSqre;
+                closestAxis = axis;
+            }
+            else
+            {
 
-	//If there were no hits, return a null result.
-	if (!foundFirst) return RayTraceResult();
+            }
+        }
+    }
+    res.ReflectNormal[closestAxis] = BasicMath::Sign(res.HitPos[closestAxis] - GetCenter()[closestAxis]);
 
-
-	//Otherwise, get the correct surface normal and return the ray hit.
-
-	Vector3f normal;
-	normal[closestDim] = (positives[closestDim] ? 1.0f : -1.0f);
-
-	return RayTraceResult(hits[closestDim].Point, normal);
+    return res;
 }
 
 

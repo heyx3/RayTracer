@@ -255,16 +255,16 @@ public:
 	template<class Vector>
 	struct PointOnLineAtValueResult { Vector Point; float t; PointOnLineAtValueResult(Vector p, float _t) : Point(p), t(_t) { } };
 	template<class Vector>
-	//Given a line, a target dimension and a target value, gets "p" and "t", where:
+	//Given a line, a target axis and a target value, gets "p" and "t", where:
 	//1) p = vOnLine + (vLineDir * t)
 	//2) p[dimension] = targetValue
 	//For example, this function could be used to find the point with Y value 5.25f for some line.
 	//0 = X axis, 1 = Y axis, 2 = Z axis, 3 = W axis.
 	//"vLineDir" does not need to be normalized.
 	//Assumes that "vLineDir" is not 0 in the given dimension.
-	static PointOnLineAtValueResult<Vector> GetPointOnLineAtValue(Vector vOnLine, Vector vLineDir, int dimension, float targetValue)
+	static PointOnLineAtValueResult<Vector> GetPointOnLineAtValue(Vector vOnLine, Vector vLineDir, int axis, float targetValue)
 	{
-		float t = (targetValue - vOnLine[dimension]) / vLineDir[dimension];
+        float t = (targetValue - vOnLine[axis]) / vLineDir[axis];
 		return PointOnLineAtValueResult<Vector>(vOnLine + (vLineDir * t), t);
 	}
 
