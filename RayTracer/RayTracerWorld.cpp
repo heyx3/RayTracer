@@ -14,7 +14,8 @@ void RayTracerWorld::DeleteData(void)
 	DeleteAndSetToNull(pixels);
 }
 
-const int numbShapes = 2;
+Sphere * tracerCirc = 0;
+const int numbShapes = 3;
 void RayTracerWorld::InitializeWorld(void)
 {
 	SFMLOpenGLWorld::InitializeWorld();
@@ -32,8 +33,11 @@ void RayTracerWorld::InitializeWorld(void)
 	screenSpr = new sf::Sprite();
 
 	//Create the shapes to ray-trace.
-	shapes.insert(shapes.end(), Object(std::shared_ptr<Shape>(new Plane(Vector3f(), Vector3f(50, 50, 50).Normalized())), Vector3b(255, 255, 255)));
-    shapes.insert(shapes.end(), Object(std::shared_ptr<Shape>(new Capsule(Vector3f(-25, 0, 0), Vector3f(25, 0, 0), 2.0f)), Vector3b(50, 100, 255)));
+    shapes.insert(shapes.end(), Object(std::shared_ptr<Shape>(new Capsule(Vector3f(-25, 0, 0), Vector3f(25, 0, 0), 2.0f)), Vector3b(255, 255, 50)));
+	shapes.insert(shapes.end(), Object(std::shared_ptr<Shape>(new Sphere(Vector3f(), 100.0f)), Vector3b(255, 255, 255)));
+    tracerCirc = new Sphere(Vector3f(), 10.0f);
+    shapes.insert(shapes.end(), Object(std::shared_ptr<Shape>(tracerCirc), Vector3b(255, 255, 255)));
+    isShapeTouching.insert(isShapeTouching.end(), false);
     isShapeTouching.insert(isShapeTouching.end(), false);
     isShapeTouching.insert(isShapeTouching.end(), false);
 
@@ -61,11 +65,11 @@ void RayTracerWorld::UpdateWorld(float elapsedSeconds)
     currentFPSBufferIndex = (currentFPSBufferIndex + 1) % fpsBufferSize;
 
 
-    for (int i = 0; i < shapes.size(); ++i)
+    for (int i = 0; i < shapes.size(); ++i) if (shapes[i].shape.get() != tracerCirc)
     {
         isShapeTouching[i] = false;
 
-        for (int j = 0; j < shapes.size(); ++j) if (j != i)
+        for (int j = 0; j < shapes.size(); ++j) if (j != i && shapes[j].shape.get() != tracerCirc)
         {
             if (shapes[i].shape->TouchingShape(*shapes[j].shape))
             {
@@ -121,6 +125,12 @@ void RayTracerWorld::UpdateWorld(float elapsedSeconds)
 			*toChange = ScreenSize.x * ScreenSize.y;
 		}
 	}
+
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::T) && tracerCirc != 0)
+    {
+        tracerCirc->SetCenter(shapes[0].shape->FarthestPointInDirection((cam.GetPosition() - shapes[0].shape->GetCenter()).Normalized()));
+    }
 }
 
 void RayTracerWorld::OnWindowResized(unsigned int w, unsigned int h)

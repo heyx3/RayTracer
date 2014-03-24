@@ -13,7 +13,7 @@ class Sphere;
 class Capsule;
 class Plane;
 class Triangle;
-class Polygon;
+class PolygonSolid;
 
 
 //Represents some kind of 3D shape. Uses double dispatch for checking collision against other shapes.
@@ -37,7 +37,7 @@ public:
     virtual bool TouchingCapsule(const Capsule & capsule) const = 0;
     virtual bool TouchingPlane(const Plane & plane) const = 0;
     virtual bool TouchingTriangle(const Triangle & tri) const = 0;
-    virtual bool TouchingPolygon(const Polygon & poly) const;
+    virtual bool TouchingPolygon(const PolygonSolid & poly) const;
 
 
 	struct RayTraceResult
@@ -151,16 +151,48 @@ public:
 };
 class Capsule : public Shape
 {
+private:
+
+    void PrintVector(Vector3f v)
+    {
+        std::cout << v.x << ", " << v.y << ", " << v.z;
+    }
+
 public:
 
-	float Radius;
+    float Radius;
 
-    Capsule(Vector3f _l1, Vector3f _l2, float radius) : Shape((l1 + l2) * 0.5f), Radius(radius), l1(_l1), l2(_l2) { }
+    Capsule(Vector3f _l1, Vector3f _l2, float radius)
+        : Shape((l1 + l2) * 0.5f), Radius(radius), l1(_l1), l2(_l2)
+    {
+        PrintVector(l1);
+        std::cout << "\n";
+        PrintVector(l2);
+        std::cout << "\n";
+        PrintVector(GetCenter());
+        std::cout << "\n";
+    }
 
 
     virtual Vector3f FarthestPointInDirection(Vector3f dirNormalized) const override
     {
+        Vector3f alongCapsule = (l2 - l1),
+                 alongCapsuleNorm = alongCapsule.Normalized();
+        float dir_dot_alongCapsule = dirNormalized.Dot(alongCapsuleNorm);
 
+        //If the farthest point is one of the capsule ends, exit early
+        //    (otherwise a divide-by-zero will occur later in this function).
+        if (BasicMath::Abs(dir_dot_alongCapsule) == 1.0f)
+        {
+            return GetCenter() + (alongCapsule * BasicMath::Sign(dir_dot_alongCapsule));
+        }
+
+        //Get the farthest point along the infinite cylinder this capsule is a subset of.
+        Vector3f towardFarthest = alongCapsuleNorm.Cross(dirNormalized).Cross(alongCapsuleNorm);
+        float ratio = Radius / towardFarthest.Dot(dirNormalized);
+        Vector3f farthest = GetCenter() + (dirNormalized * ratio);
+
+        //TODO: Constrain if the point is past the sphere ends.
     }
 
     virtual bool TouchingShape(const Shape & shape) const override { return shape.TouchingCapsule(*this); }
@@ -184,7 +216,13 @@ public:
 	Vector3f GetParallelVector(void) const { return (l2 - l1).Normalized(); }
 	float GetLength(void) const { return l2.Distance(l1) + Radius; }
 	
-    virtual void SetCenter(Vector3f center) override { Translate(center - GetCenter()); }
+    virtual void SetCenter(Vector3f center) override
+    {
+        Vector3f delta = center - GetCenter();
+        l1 += delta;
+        l2 += delta;
+        Shape::SetCenter(center);
+    }
 
     virtual bool IsPointInside(Vector3f point) const override
     {
@@ -230,7 +268,8 @@ public:
 
     virtual Vector3f FarthestPointInDirection(Vector3f dirNormalized) const override
     {
-        return GetCenter();
+        return (dirNormalized - (Normal * Normal.Dot(dirNormalized))) *
+               std::numeric_limits<float>::max();
     }
 
     virtual bool TouchingShape(const Shape & shape) const override { return shape.TouchingPlane(*this); }
@@ -273,6 +312,12 @@ public:
         vertices[0] = _vertices[0];
         vertices[1] = _vertices[1];
         vertices[2] = _vertices[2];
+    }
+
+    
+    virtual Vector3f FarthestPointInDirection(Vector3f dirNormalized) const override
+    {
+        return GetCenter();
     }
 
     virtual bool TouchingShape(const Shape & shape) const override { return shape.TouchingTriangle(*this); }
@@ -320,15 +365,23 @@ private:
 
 
 
-//TODO: Polygon stuff currently doesn't take into account the inside of the polygon -- only the surface. Maybe have two polygon classes: SimplePolygon (convex) and ComplexPolygon (concave, made of several SimplePolygons).
-class Polygon : public Shape
+//TODO: PolygonSolid stuff currently doesn't take into account the inside of the polygon -- only the surface. Maybe have two polygon classes: SimplePolygon (convex) and ComplexPolygon (concave, made of several SimplePolygons).
+class PolygonSolid : public Shape
 {
 public:
 
-    Polygon(const std::vector<Triangle> & _triangles) : Shape(GetAverage(_triangles)), triangles(_triangles) { }
+    PolygonSolid(const std::vector<Triangle> & _triangles) : Shape(GetAverage(_triangles)), triangles(_triangles) { }
 
 
     const std::vector<Triangle> & GetTriangles(void) const { return triangles; }
+
+
+
+    virtual Vector3f FarthestPointInDirection(Vector3f dirNormalized) const override
+    {
+        return GetCenter();
+    }
+
 
     virtual bool TouchingShape(const Shape & shape) const override { return shape.TouchingPolygon(*this); }
 
@@ -357,7 +410,7 @@ public:
         return std::any_of(triangles.begin(), triangles.end(),
                            [&triangle](const Triangle & tri) { return triangle.TouchingTriangle(tri); });
     }
-    virtual bool TouchingPolygon(const Polygon & poly) const override
+    virtual bool TouchingPolygon(const PolygonSolid & poly) const override
     {
         return std::any_of(triangles.begin(), triangles.end(),
                            [&poly](const Triangle & tri)
@@ -381,7 +434,7 @@ public:
                        [&newCenter](Triangle & tri) { tri.SetCenter(newCenter); });
     }
 
-    virtual ShapePtr GetClone(void) const override { return ShapePtr(new Polygon(triangles)); }
+    virtual ShapePtr GetClone(void) const override { return ShapePtr(new PolygonSolid(triangles)); }
 
     virtual Box3D GetBoundingBox(void) const override;
 

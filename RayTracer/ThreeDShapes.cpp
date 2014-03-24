@@ -1,8 +1,8 @@
 #include "ThreeDShapes.h"
 
-//TODO: Finish testing.
+//TODO: Finish Capsule::FarthestPointInDirection(), then test all of them.
 
-bool Shape::TouchingPolygon(const Polygon & poly) const
+bool Shape::TouchingPolygon(const PolygonSolid & poly) const
 {
     const Shape * shpe = this;
     return std::any_of(poly.GetTriangles().begin(), poly.GetTriangles().end(),
@@ -403,7 +403,7 @@ Box3D Plane::GetBoundingBox(void) const
 }
 
 
-Box3D Polygon::GetBoundingBox(void) const
+Box3D PolygonSolid::GetBoundingBox(void) const
 {
     if (triangles.size() == 0) return Box3D();
 

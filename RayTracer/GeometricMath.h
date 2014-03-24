@@ -18,8 +18,10 @@ private:
 	template<>
 	static int NumbDimensions<Vector4f>(Vector4f v) { return 4; }
 
+
 public:
-	
+
+
 	template<class Vector>
 	static bool AreColinear(Vector p1, Vector p2, Vector p3)
 	{
