@@ -213,7 +213,8 @@ bool Capsule::TouchingSphere(const Sphere & sphere) const
 {
 	Vector3f capPoint = GeometricMath::ClosestToLine(l1, l2, sphere.GetCenter(), false);
 	
-	return capPoint.DistanceSquared(sphere.GetCenter()) <= (BasicMath::Square(sphere.Radius) + BasicMath::Square(Radius));
+	return capPoint.DistanceSquared(sphere.GetCenter()) <=
+           (BasicMath::Square(sphere.Radius) + BasicMath::Square(Radius));
 }
 bool Capsule::TouchingCapsule(const Capsule & capsule) const
 {
