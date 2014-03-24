@@ -33,7 +33,7 @@ void RayTracerWorld::InitializeWorld(void)
 
 	//Create the shapes to ray-trace.
 	shapes.insert(shapes.end(), Object(std::shared_ptr<Shape>(new Cube(Vector3f(), Vector3f(50, 50, 50))), Vector3b(255, 255, 255)));
-    shapes.insert(shapes.end(), Object(std::shared_ptr<Shape>(new Plane(Vector3f(), Vector3f(1, 1, 1).Normalized())), Vector3b(50, 100, 255)));
+    shapes.insert(shapes.end(), Object(std::shared_ptr<Shape>(new Capsule(Vector3f(-30, 0, 0), Vector3f(30, 0, 0), 30.0f)), Vector3b(50, 100, 255)));
     isShapeTouching.insert(isShapeTouching.end(), false);
     isShapeTouching.insert(isShapeTouching.end(), false);
 
@@ -174,7 +174,7 @@ Vector3b RayTracerWorld::TracePixel(Vector3f pixelStart, Vector3f pixelDir, int 
 
 
 	//Find the ray intersection closest to the pixel.
-	//Since we're tracing along a ray,
+	//Since we're tracing along a straight line,
 	//    save processing speed and just use a single axis
 	//    to check distance between a point and the pixel.
 
@@ -247,6 +247,9 @@ void RayTracerWorld::TracePixelColumns(int firstCol, int lastCol, Vector3f incre
 void RayTracerWorld::ApplyAntialias(void)
 {
     return;
+
+
+
 	Vector3i sum;
 	int numbSamples;
 	int x, y, x2, y2;

@@ -231,8 +231,78 @@ bool Capsule::TouchingTriangle(const Triangle & tris) const
 
 Capsule::RayTraceResult Capsule::RayHitCheck(Vector3f rayStart, Vector3f rayDir) const
 {
-	//No capsule ray hits yet.
-	return RayTraceResult();
+    //Taken from http://blog.makingartstudios.com/?p=286
+
+    //l1 is 'a', l2 is 'b'.
+    Vector3f aToB = l2 - l1;
+    Vector3f aToO = rayStart - l1;
+    float aToB_dot_aToB = aToB.Dot(aToB);
+    float m = aToB.Dot(rayDir) / aToB_dot_aToB,
+          n = aToB.Dot(aToO) / aToB_dot_aToB;
+
+    Vector3f q = rayDir - (aToB * m),
+             r = aToO - (aToB * n);
+
+
+    //Quadratic formula. The solutions are the 't' values for
+    //    the ray's equation that correspond to intersections.
+
+    float a = q.Dot(q),
+          b = 2.0f * q.Dot(r),
+          c = r.Dot(r) - (Radius * Radius);
+
+    float determinant = (b * b) - (4.0f * a * c);
+    if (determinant < 0.0f) return RayTraceResult();
+
+    float detSqrt = sqrtf(determinant),
+          otherNominator = -b,
+          divDenominator = 0.5f / a;
+    float t1 = (otherNominator + detSqrt) * divDenominator,
+          t2 = (otherNominator - detSqrt) * divDenominator;
+
+    
+    //These intersections are actually for the infinite cylinder that this capsule is a subset of.
+    //See if any of the intersections are actually on the capsule.
+
+    RayTraceResult intersect1, intersect2;
+    float capsuleT1 = (t1 * m) + n,
+          capsuleT2 = (t2 * m) + n;
+
+    if (capsuleT1 < 0.0f)
+    {
+        intersect1 = Sphere(l1, Radius).RayHitCheck(rayStart, rayDir);
+    }
+    else if (capsuleT1 > 1.0f)
+    {
+        intersect1 = Sphere(l2, Radius).RayHitCheck(rayStart, rayDir);
+    }
+    else
+    {
+        Vector3f point = rayStart + (rayDir * t1);
+        intersect1 = RayTraceResult(point, (point - (l1 + (aToB * capsuleT1))).Normalized());
+    }
+
+    if (capsuleT2 < 0.0f)
+    {
+        intersect2 = Sphere(l1, Radius).RayHitCheck(rayStart, rayDir);
+    }
+    else if (capsuleT2 > 1.0f)
+    {
+        intersect2 = Sphere(l2, Radius).RayHitCheck(rayStart, rayDir);
+    }
+    else
+    {
+        Vector3f point = rayStart + (rayDir * t2);
+        intersect2 = RayTraceResult(point, (point - (l1 + (aToB * capsuleT2))).Normalized());
+    }
+
+
+    //Note that if there was only one intersection, "intersect1" and "intersect2"
+    //    will both contain that intersection.
+    if ((!intersect1.DidHitTarget && !intersect2.DidHitTarget) ||
+        intersect1.HitPos.DistanceSquared(rayStart) < intersect2.HitPos.DistanceSquared(rayStart))
+        return intersect1;
+    else return intersect2;
 }
 
 Box3D Capsule::GetBoundingBox(void) const

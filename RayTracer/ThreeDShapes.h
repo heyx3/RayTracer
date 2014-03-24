@@ -193,7 +193,7 @@ public:
     //Gets the signed distance from the given point to this plane.
     float GetDistanceToPlane(Vector3f point) const
     {
-        return GetCenter().Dot(Normal) - point.Dot(Normal);
+        return (GetCenter() - point).Dot(Normal);
     }
 
     struct PointOnPlaneInfo { public: Vector3f OnPlane; float Distance; };

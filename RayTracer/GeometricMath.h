@@ -127,8 +127,15 @@ public:
 	}
 
 	template<class Vector>
-	//The return value for "ClosestToIntersection".
-	struct ClosestValues { Vector OnFirstLine, OnSecondLine; ClosestValues(Vector first, Vector second) : OnFirstLine(first), OnSecondLine(second) { } };
+	//The return value for "ClosestToIntersection". If "IsParallel" is true, then "OnFirstLine" and "OnSecondLine" will not be set to meaningful values.
+	struct ClosestValues
+    {
+    public:
+        bool IsParallel;
+        Vector OnFirstLine, OnSecondLine;
+        ClosestValues(Vector first, Vector second) : IsParallel(false), OnFirstLine(first), OnSecondLine(second) { }
+        ClosestValues(bool isParallel = true) : IsParallel(true) { }
+    };
 	template<class Vector>
 	//Given two lines/segments, finds the closest points on each line/segment to the other.
 	static ClosestValues<Vector> ClosestToIntersection(Vector firstLine_1, Vector firstLine_2, Vector secondLine_1, Vector secondLine_2, bool areLinesInfinite)
@@ -141,8 +148,9 @@ public:
 			   u = (firstLine_2 - firstLine_1),
 			   v = (secondLine_2 - secondLine_1);
 
-		//If the lines are parallel, their distance is constant. Just use the midpoints of the given lines.
-		if (u == v || u == -v) return ClosestValues<Vector>((p0 + firstLine_2) * 0.5f, (q0 + secondLine_2) * 0.5f);
+		//If the lines are parallel, their distance is constant.
+        if (u == v || u == -v) return ClosestValues<Vector>();
+
 
 		Vector w0 = p0 - q0;
 		float a = u.Dot(u),
