@@ -131,7 +131,8 @@ bool Sphere::TouchingCapsule(const Capsule & capsule) const
 {
 	Vector3f capPoint = GeometricMath::ClosestToLine(capsule.GetEndpoint1(), capsule.GetEndpoint2(), GetCenter(), false);
 
-	return capPoint.DistanceSquared(GetCenter()) <= (BasicMath::Square(Radius) + BasicMath::Square(capsule.Radius));
+	return capPoint.DistanceSquared(GetCenter()) <=
+           (BasicMath::Square(Radius) + BasicMath::Square(capsule.Radius));
 }
 bool Sphere::TouchingPlane(const Plane & plane) const
 {
@@ -218,11 +219,18 @@ bool Capsule::TouchingCapsule(const Capsule & capsule) const
 {
 	GeometricMath::ClosestValues<Vector3f> cvs = GeometricMath::ClosestToIntersection(l1, l2, capsule.l1, capsule.l2, false);
 
-	return cvs.OnFirstLine.DistanceSquared(cvs.OnSecondLine) <= (BasicMath::Square(Radius) + BasicMath::Square(capsule.Radius));
+	return cvs.OnFirstLine.DistanceSquared(cvs.OnSecondLine) <=
+           (BasicMath::Square(Radius) + BasicMath::Square(capsule.Radius));
 }
 bool Capsule::TouchingPlane(const Plane & plane) const
 {
-	return false;
+    float distance1 = plane.GetDistanceToPlane(l1),
+          distance2 = plane.GetDistanceToPlane(l2);
+
+    Interval distanceIntvl(distance1, distance2, 0.001f, true, true);
+    distanceIntvl = distanceIntvl.Widen(Radius + Radius);
+
+    return distanceIntvl.Touches(0.0f);
 }
 bool Capsule::TouchingTriangle(const Triangle & tris) const
 {
@@ -353,7 +361,13 @@ bool Plane::TouchingSphere(const Sphere & sphere) const
 }
 bool Plane::TouchingCapsule(const Capsule & capsule) const
 {
-	return false;
+    float distance1 = GetDistanceToPlane(capsule.GetEndpoint1()),
+          distance2 = GetDistanceToPlane(capsule.GetEndpoint2());
+
+    Interval distanceIntvl(distance1, distance2, 0.001f, true, true);
+    distanceIntvl = distanceIntvl.Widen(capsule.Radius + capsule.Radius);
+
+    return distanceIntvl.Touches(0.0f);
 }
 bool Plane::TouchingPlane(const Plane & plane) const
 {

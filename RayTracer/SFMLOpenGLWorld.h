@@ -12,6 +12,8 @@ public:
 
 protected:
 
+    virtual void OnWindowResized(unsigned int newWidth, unsigned int newHeight) override;
+
 	virtual void InitializeWorld(void) override;
 	virtual void OnInitializeError(std::string errorMsg) { fprintf(stderr, "Initialization error: '%s'\n", errorMsg.c_str()); }
 };

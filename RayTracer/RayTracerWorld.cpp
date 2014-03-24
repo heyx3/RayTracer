@@ -32,7 +32,7 @@ void RayTracerWorld::InitializeWorld(void)
 	screenSpr = new sf::Sprite();
 
 	//Create the shapes to ray-trace.
-	shapes.insert(shapes.end(), Object(std::shared_ptr<Shape>(new Cube(Vector3f(), Vector3f(50, 50, 50))), Vector3b(255, 255, 255)));
+	shapes.insert(shapes.end(), Object(std::shared_ptr<Shape>(new Plane(Vector3f(), Vector3f(50, 50, 50).Normalized())), Vector3b(255, 255, 255)));
     shapes.insert(shapes.end(), Object(std::shared_ptr<Shape>(new Capsule(Vector3f(-25, 0, 0), Vector3f(25, 0, 0), 2.0f)), Vector3b(50, 100, 255)));
     isShapeTouching.insert(isShapeTouching.end(), false);
     isShapeTouching.insert(isShapeTouching.end(), false);

@@ -5,6 +5,7 @@
 #include <SFML/System.hpp>
 #include <SFML/Graphics.hpp>
 
+
 void SFMLOpenGLWorld::InitializeWorld(void)
 {
 	//Set up GLEW.
@@ -16,4 +17,9 @@ void SFMLOpenGLWorld::InitializeWorld(void)
 	}
 
 	GetWindow()->setVerticalSyncEnabled(true);
+}
+
+void SFMLOpenGLWorld::OnWindowResized(unsigned int newWidth, unsigned int newHeight)
+{
+    glViewport(0, 0, newWidth, newHeight);
 }
