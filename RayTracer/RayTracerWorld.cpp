@@ -33,7 +33,7 @@ void RayTracerWorld::InitializeWorld(void)
 	screenSpr = new sf::Sprite();
 
 	//Create the shapes to ray-trace.
-    shapes.insert(shapes.end(), Object(std::shared_ptr<Shape>(new Capsule(Vector3f(-25, 0, 0), Vector3f(25, 0, 0), 2.0f)), Vector3b(255, 255, 50)));
+    shapes.insert(shapes.end(), Object(std::shared_ptr<Shape>(new Capsule(Vector3f(-25, 0, 0), Vector3f(25, 0, 0), 10.0f)), Vector3b(255, 255, 50)));
 	shapes.insert(shapes.end(), Object(std::shared_ptr<Shape>(new Sphere(Vector3f(), 100.0f)), Vector3b(255, 255, 255)));
     tracerCirc = new Sphere(Vector3f(), 10.0f);
     shapes.insert(shapes.end(), Object(std::shared_ptr<Shape>(tracerCirc), Vector3b(255, 255, 255)));
@@ -127,7 +127,7 @@ void RayTracerWorld::UpdateWorld(float elapsedSeconds)
 	}
 
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::T) && tracerCirc != 0)
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift) && tracerCirc != 0)
     {
         tracerCirc->SetCenter(shapes[0].shape->FarthestPointInDirection((cam.GetPosition() - shapes[0].shape->GetCenter()).Normalized()));
     }

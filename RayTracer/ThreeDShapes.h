@@ -19,12 +19,20 @@ class PolygonSolid;
 //Represents some kind of 3D shape. Uses double dispatch for checking collision against other shapes.
 class Shape
 {
+protected:
+
+    void PrintVector(Vector3f v)
+    {
+    }
+
 public:
 
 	typedef std::shared_ptr<Shape> ShapePtr;
 
 
-	Shape(Vector3f centerPos) : center(centerPos) { }
+	Shape(Vector3f centerPos) : center(centerPos)
+    {
+    }
 
 
     //Gets the point on the shape's surface farthest in the given direction.
@@ -151,26 +159,13 @@ public:
 };
 class Capsule : public Shape
 {
-private:
-
-    void PrintVector(Vector3f v)
-    {
-        std::cout << v.x << ", " << v.y << ", " << v.z;
-    }
-
 public:
 
     float Radius;
 
     Capsule(Vector3f _l1, Vector3f _l2, float radius)
-        : Shape((l1 + l2) * 0.5f), Radius(radius), l1(_l1), l2(_l2)
+        : Shape((_l1 + _l2) * 0.5f), Radius(radius), l1(_l1), l2(_l2)
     {
-        PrintVector(l1);
-        std::cout << "\n";
-        PrintVector(l2);
-        std::cout << "\n";
-        PrintVector(GetCenter());
-        std::cout << "\n";
     }
 
 
@@ -193,6 +188,7 @@ public:
         Vector3f farthest = GetCenter() + (dirNormalized * ratio);
 
         //TODO: Constrain if the point is past the sphere ends.
+        return farthest;
     }
 
     virtual bool TouchingShape(const Shape & shape) const override { return shape.TouchingCapsule(*this); }
@@ -236,7 +232,7 @@ public:
 
 private:
 
-	void RecomputeCenter(void) { SetCenter((l1 + l2) * 0.5f); }
+	void RecomputeCenter(void) { Shape::SetCenter((l1 + l2) * 0.5f); }
 
 	Vector3f l1, l2;
 };
