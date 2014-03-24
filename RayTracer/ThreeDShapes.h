@@ -27,6 +27,9 @@ public:
 	Shape(Vector3f centerPos) : center(centerPos) { }
 
 
+    //Gets the point on the shape's surface farthest in the given direction.
+    virtual Vector3f FarthestPointInDirection(Vector3f dirNormalized) const = 0;
+
 	virtual bool TouchingShape(const Shape & shape) const = 0;
 
 	virtual bool TouchingCube(const Cube & cube) const = 0;
@@ -77,6 +80,13 @@ public:
     Cube(const Box3D & toCopy) : Shape(toCopy.GetCenter()), Bounds(toCopy) { }
 
 
+    virtual Vector3f FarthestPointInDirection(Vector3f dirNormalized) const override
+    {
+        return Vector3f(Bounds.GetCenterX() + (BasicMath::Sign(dirNormalized.x) * 0.5f * Bounds.GetXSize()),
+                        Bounds.GetCenterY() + (BasicMath::Sign(dirNormalized.y) * 0.5f * Bounds.GetYSize()),
+                        Bounds.GetCenterZ() + (BasicMath::Sign(dirNormalized.z) * 0.5f * Bounds.GetZSize()));
+    }
+
 	virtual bool TouchingShape(const Shape & shape) const override { return shape.TouchingCube(*this); }
 
 	virtual bool TouchingCube(const Cube & cube) const override { return Bounds.Touches(cube.Bounds); }
@@ -115,7 +125,12 @@ public:
     Sphere(Vector3f center, float radius) : Shape(center), Radius(radius) { }
 
 
-	virtual bool TouchingShape(const Shape & shape) const override { return shape.TouchingSphere(*this); }
+    virtual Vector3f FarthestPointInDirection(Vector3f dirNormalized) const override
+    {
+        return GetCenter() + (dirNormalized * Radius);
+    }
+
+    virtual bool TouchingShape(const Shape & shape) const override { return shape.TouchingSphere(*this); }
 	
 	virtual bool TouchingCube(const Cube & cube) const override;
 	virtual bool TouchingSphere(const Sphere & sphere) const override { return GetCenter().DistanceSquared(sphere.GetCenter()) <= (BasicMath::Square(sphere.Radius + Radius) + BasicMath::Square(0.0f)); }
@@ -142,8 +157,13 @@ public:
 
     Capsule(Vector3f _l1, Vector3f _l2, float radius) : Shape((l1 + l2) * 0.5f), Radius(radius), l1(_l1), l2(_l2) { }
 
-	
-	virtual bool TouchingShape(const Shape & shape) const override { return shape.TouchingCapsule(*this); }
+
+    virtual Vector3f FarthestPointInDirection(Vector3f dirNormalized) const override
+    {
+
+    }
+
+    virtual bool TouchingShape(const Shape & shape) const override { return shape.TouchingCapsule(*this); }
 	
 	virtual bool TouchingCube(const Cube & cube) const override;
 	virtual bool TouchingSphere(const Sphere & sphere) const override;
@@ -207,7 +227,13 @@ public:
         return ret;
     }
 
-	virtual bool TouchingShape(const Shape & shape) const override { return shape.TouchingPlane(*this); }
+
+    virtual Vector3f FarthestPointInDirection(Vector3f dirNormalized) const override
+    {
+        return GetCenter();
+    }
+
+    virtual bool TouchingShape(const Shape & shape) const override { return shape.TouchingPlane(*this); }
 
 	virtual bool TouchingCube(const Cube & cube) const override;
 	virtual bool TouchingSphere(const Sphere & sphere) const override;
@@ -226,6 +252,10 @@ public:
 
     virtual Box3D GetBoundingBox(void) const override;
 };
+
+
+
+
 class Triangle : public Shape
 {
 public:
