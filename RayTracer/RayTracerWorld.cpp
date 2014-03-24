@@ -33,7 +33,7 @@ void RayTracerWorld::InitializeWorld(void)
 
 	//Create the shapes to ray-trace.
 	shapes.insert(shapes.end(), Object(std::shared_ptr<Shape>(new Cube(Vector3f(), Vector3f(50, 50, 50))), Vector3b(255, 255, 255)));
-    shapes.insert(shapes.end(), Object(std::shared_ptr<Shape>(new Capsule(Vector3f(-30, 0, 0), Vector3f(30, 0, 0), 30.0f)), Vector3b(50, 100, 255)));
+    shapes.insert(shapes.end(), Object(std::shared_ptr<Shape>(new Capsule(Vector3f(-25, 0, 0), Vector3f(25, 0, 0), 2.0f)), Vector3b(50, 100, 255)));
     isShapeTouching.insert(isShapeTouching.end(), false);
     isShapeTouching.insert(isShapeTouching.end(), false);
 

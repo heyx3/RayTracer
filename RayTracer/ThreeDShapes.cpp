@@ -276,6 +276,10 @@ Capsule::RayTraceResult Capsule::RayHitCheck(Vector3f rayStart, Vector3f rayDir)
     {
         intersect1 = Sphere(l2, Radius).RayHitCheck(rayStart, rayDir);
     }
+    else if (t1 < 0.0f)
+    {
+        intersect1 = RayTraceResult();
+    }
     else
     {
         Vector3f point = rayStart + (rayDir * t1);
@@ -289,6 +293,10 @@ Capsule::RayTraceResult Capsule::RayHitCheck(Vector3f rayStart, Vector3f rayDir)
     else if (capsuleT2 > 1.0f)
     {
         intersect2 = Sphere(l2, Radius).RayHitCheck(rayStart, rayDir);
+    }
+    else if (t2 < 0.0f)
+    {
+        intersect2 = RayTraceResult();
     }
     else
     {
