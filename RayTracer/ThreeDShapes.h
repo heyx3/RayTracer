@@ -49,6 +49,8 @@ public:
 
 	virtual ShapePtr GetClone(void) const = 0;
 
+    void MoveCenter(Vector3f deltaCenter) { SetCenter(center + deltaCenter); }
+
 	virtual void SetCenter(Vector3f newCenter) { center = newCenter; }
 	Vector3f GetCenter(void) const { return center; }
 
@@ -188,13 +190,19 @@ public:
 
     Plane(Vector3f onPlane, Vector3f normal) : Shape(onPlane), Normal(normal) { }
 
+    //Gets the signed distance from the given point to this plane.
+    float GetDistanceToPlane(Vector3f point) const
+    {
+        return GetCenter().Dot(Normal) - point.Dot(Normal);
+    }
+
     struct PointOnPlaneInfo { public: Vector3f OnPlane; float Distance; };
     //Gets the point on this Plane closest to the given point, as well as
     //   the signed distance from the given point to this plane.
-    PointOnPlaneInfo ClosestPointOnPlane(Vector3f point) const
+    PointOnPlaneInfo GetClosestPointOnPlane(Vector3f point) const
     {
         PointOnPlaneInfo ret;
-        ret.Distance = (GetCenter().Dot(Normal)) - (point.Dot(Normal));
+        ret.Distance = GetDistanceToPlane(point);
         ret.OnPlane = point + (Normal * ret.Distance);
         return ret;
     }
@@ -209,7 +217,10 @@ public:
 
     virtual RayTraceResult RayHitCheck(Vector3f rayStart, Vector3f rayDir) const override;
 
-    virtual bool IsPointInside(Vector3f point) const override;
+    virtual bool IsPointInside(Vector3f point) const override
+    {
+        return GetDistanceToPlane(point) == 0.0f;
+    }
 
     virtual ShapePtr GetClone(void) const override { return ShapePtr(new Plane(GetCenter(), Normal)); }
 

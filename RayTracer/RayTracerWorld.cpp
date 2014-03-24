@@ -33,7 +33,7 @@ void RayTracerWorld::InitializeWorld(void)
 
 	//Create the shapes to ray-trace.
 	shapes.insert(shapes.end(), Object(std::shared_ptr<Shape>(new Cube(Vector3f(), Vector3f(50, 50, 50))), Vector3b(255, 255, 255)));
-    shapes.insert(shapes.end(), Object(std::shared_ptr<Shape>(new Cube(Vector3f(50, 50, 50), Vector3f(50, 50, 50))), Vector3b(50, 100, 255)));
+    shapes.insert(shapes.end(), Object(std::shared_ptr<Shape>(new Plane(Vector3f(), Vector3f(1, 1, 1).Normalized())), Vector3b(50, 100, 255)));
     isShapeTouching.insert(isShapeTouching.end(), false);
     isShapeTouching.insert(isShapeTouching.end(), false);
 
@@ -46,7 +46,7 @@ void RayTracerWorld::InitializeWorld(void)
 	cam.SetMoveSpeed(25.0f);
 
 	//Set up the light.
-	light = DirectionalLight(0.5f, 0.05f, Vector3f(1, 1, 1), Vector3f(-2, -3, -1).Normalized());
+	light = DirectionalLight(0.8f, 0.2f, Vector3f(1, 1, 1), Vector3f(-2, -3, -5).Normalized());
 
 	//Set up debug font.
 	debugFont.loadFromFile("times.ttf");

@@ -32,11 +32,16 @@ bool Cube::TouchingCapsule(const Capsule & capsule) const
 }
 bool Cube::TouchingPlane(const Plane & plane) const
 {
-    Plane::PointOnPlaneInfo info = plane.ClosestPointOnPlane(GetCenter());
+    //Taken from http://www.gamasutra.com/view/feature/131790/simple_intersection_tests_for_games.php?print=1, section "A Box-Plane Intersection Test".
+    
+    //If this function gets remade for a box that isn't axis-aligned, use "BasicMath::Abs(plane.Normal.Dot([normalized axis vector])"
+    //    for each axis rotated from box space to world space.
+    float val = Bounds.GetXSize() * BasicMath::Abs(plane.Normal.x) +
+                Bounds.GetYSize() * BasicMath::Abs(plane.Normal.y) +
+                Bounds.GetZSize() * BasicMath::Abs(plane.Normal.z);
+    val *= 0.5f;
 
-    //TODO: Finish.
-
-	return false;
+    return BasicMath::Abs(plane.GetDistanceToPlane(GetCenter())) <= val;
 }
 bool Cube::TouchingTriangle(const Triangle & tris) const
 {
@@ -243,7 +248,16 @@ Box3D Capsule::GetBoundingBox(void) const
 
 bool Plane::TouchingCube(const Cube & cube) const
 {
-	return false;
+    //Refer to Cube::TouchingPlane(const Plane & plane) for the info about this formula.
+
+    const Box3D & bounds = cube.GetBounds();
+
+    float val = bounds.GetXSize() * BasicMath::Abs(Normal.x) +
+                bounds.GetYSize() * BasicMath::Abs(Normal.y) +
+                bounds.GetZSize() * BasicMath::Abs(Normal.z);
+    val *= 0.5f;
+
+    return BasicMath::Abs(GetDistanceToPlane(cube.GetCenter())) <= val;
 }
 bool Plane::TouchingSphere(const Sphere & sphere) const
 {

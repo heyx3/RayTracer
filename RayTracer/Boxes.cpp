@@ -31,9 +31,11 @@ bool Box2D::Touches(const Box2D & other) const
 }
 bool Box2D::IsInside(const Box2D & other) const
 {
+    Vector2f min = GetMinCorner(),
+             max = GetMaxCorner();
 	return other.IsPointInside(GetMinCorner()) &&
-		   other.IsPointInside(GetTopRight()) &&
-		   other.IsPointInside(GetBottomLeft()) &&
+		   other.IsPointInside(Vector2f(min.x, max.y)) &&
+		   other.IsPointInside(Vector2f(max.x, min.y)) &&
 		   other.IsPointInside(GetMaxCorner());
 }
 
@@ -108,14 +110,16 @@ bool Box3D::Touches(const Box3D & other) const
 }
 bool Box3D::IsInside(const Box3D & other) const
 {
-	return other.IsPointInside(GetMinCorner()) &&
-		   other.IsPointInside(GetTopRightFront()) &&
-		   other.IsPointInside(GetBottomLeftFront()) &&
-		   other.IsPointInside(GetBottomRightFront()) &&
-		   other.IsPointInside(GetTopLeftBack()) &&
-		   other.IsPointInside(GetTopRightBack()) &&
-		   other.IsPointInside(GetBottomLeftBack()) &&
-		   other.IsPointInside(GetMaxCorner());
+    Vector3f min = GetMinCorner(),
+             max = GetMaxCorner();
+	return other.IsPointInside(min) &&
+		   other.IsPointInside(Vector3f(min.x, min.y, max.z)) &&
+           other.IsPointInside(Vector3f(min.x, max.y, min.z)) &&
+           other.IsPointInside(Vector3f(min.x, max.y, max.z)) &&
+           other.IsPointInside(Vector3f(max.x, min.y, min.z)) &&
+           other.IsPointInside(Vector3f(max.x, min.y, max.z)) &&
+           other.IsPointInside(Vector3f(max.x, max.y, min.z)) &&
+		   other.IsPointInside(max);
 }
 
 bool Box3D::PointTouches(Vector3f point) const

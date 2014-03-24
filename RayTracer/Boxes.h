@@ -58,8 +58,8 @@ public:
 	void SetCenterOfBox(Vector2f pos) { x = pos.x - (width * 0.5f); y = pos.y - (height * 0.5f); }
 	void Move(float deltaX, float deltaY) { x += deltaX; y += deltaY; }
 
-	float GetWidth(void) const { return width; }
-	float GetHeight(void) const { return height; }
+	float GetXSize(void) const { return width; }
+	float GetYSize(void) const { return height; }
 	Vector2f GetDimensions(void) const { return Vector2f(width, height); }
 	void SetWidth(float newWidth) { width = newWidth; }
 	void SetHeight(float newHeight) { height = newHeight; }
@@ -152,9 +152,9 @@ public:
 	void SetCenterOfBox(Vector3f pos) { minCorner += (pos - GetCenter()); }
 	void Move(Vector3f amount) { minCorner += amount; }
 
-	float GetWidth(void) const { return dimensions.x; }
-	float GetHeight(void) const { return dimensions.y; }
-	float GetDepth(void) const { return dimensions.z; }
+	float GetXSize(void) const { return dimensions.x; }
+	float GetYSize(void) const { return dimensions.y; }
+	float GetZSize(void) const { return dimensions.z; }
 	Vector3f GetDimensions(void) const { return dimensions; }
 	void SetWidth(float newWidth) { dimensions.x = newWidth; }
 	void SetHeight(float newHeight) { dimensions.y = newHeight; }
