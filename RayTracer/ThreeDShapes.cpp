@@ -1,6 +1,6 @@
 #include "ThreeDShapes.h"
 
-//TODO: Finish Capsule::FarthestPointInDirection(), then test all of them.
+//TODO: Finish Capsule::FarthestPointInDirection(), then test it.
 
 bool Shape::TouchingPolygon(const PolygonSolid & poly) const
 {
@@ -38,19 +38,11 @@ Vector3f Cube::FarthestPointInDirection(Vector3f dirNormalized) const
 
 bool Cube::TouchingSphere(const Sphere & sphere) const
 {
-	Vector3f s1 = Bounds.GetMinCorner(),
-			 s2 = Bounds.GetMaxCorner(),
-			 sph = sphere.GetCenter();
-	float distSqr = BasicMath::Square(sphere.Radius);
-
-	if (sph.x < s1.x) distSqr -= BasicMath::Square(sph.x - s1.x);
-	else if (sph.x > s2.x) distSqr -= BasicMath::Square(sph.x - s2.x);
-	if (sph.y < s1.y) distSqr -= BasicMath::Square(sph.y - s1.y);
-	else if (sph.y > s2.y) distSqr -= BasicMath::Square(sph.y - s2.y);
-	if (sph.z < s1.z) distSqr -= BasicMath::Square(sph.z - s1.z);
-	else if (sph.z > s2.z) distSqr -= BasicMath::Square(sph.z - s2.z);
-
-	return distSqr > 0.0f;
+    //Get the closest point on the cube to the sphere's center.
+    Vector3f clampedToCube = Vector3f(BasicMath::Clamp(sphere.GetCenter().x, Bounds.GetXMin(), Bounds.GetXMax()),
+                                      BasicMath::Clamp(sphere.GetCenter().y, Bounds.GetYMin(), Bounds.GetYMax()),
+                                      BasicMath::Clamp(sphere.GetCenter().z, Bounds.GetZMin(), Bounds.GetZMax()));
+    return sphere.IsPointInside(clampedToCube);
 }
 bool Cube::TouchingCapsule(const Capsule & capsule) const
 {
@@ -139,19 +131,11 @@ Cube::RayTraceResult Cube::RayHitCheck(Vector3f rayStart, Vector3f rayDir) const
 
 bool Sphere::TouchingCube(const Cube & cube) const
 {
-	Vector3f s1 = cube.GetBounds().GetMinCorner(),
-			 s2 = cube.GetBounds().GetMaxCorner(),
-			 sph = GetCenter();
-	float distSqr = BasicMath::Square(Radius);
-
-	if (sph.x < s1.x) distSqr -= BasicMath::Square(sph.x - s1.x);
-	else if (sph.x > s2.x) distSqr -= BasicMath::Square(sph.x - s2.x);
-	if (sph.y < s1.y) distSqr -= BasicMath::Square(sph.y - s1.y);
-	else if (sph.y > s2.y) distSqr -= BasicMath::Square(sph.y - s2.y);
-	if (sph.z < s1.z) distSqr -= BasicMath::Square(sph.z - s1.z);
-	else if (sph.z > s2.z) distSqr -= BasicMath::Square(sph.z - s2.z);
-
-	return distSqr > 0.0f;
+    //Get the closest point on the cube to the sphere's center.
+    Vector3f clampedToCube = Vector3f(BasicMath::Clamp(GetCenter().x, cube.GetBounds().GetXMin(), cube.GetBounds().GetXMax()),
+                                      BasicMath::Clamp(GetCenter().y, cube.GetBounds().GetYMin(), cube.GetBounds().GetYMax()),
+                                      BasicMath::Clamp(GetCenter().z, cube.GetBounds().GetZMin(), cube.GetBounds().GetZMax()));
+    return IsPointInside(clampedToCube);
 }
 bool Sphere::TouchingCapsule(const Capsule & capsule) const
 {
