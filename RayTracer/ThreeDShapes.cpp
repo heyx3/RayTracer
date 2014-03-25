@@ -10,6 +10,32 @@ bool Shape::TouchingPolygon(const PolygonSolid & poly) const
 }
 
 
+Vector3f Cube::FarthestPointInDirection(Vector3f dirNormalized) const
+{
+    Vector3f absDirNormalized(BasicMath::Abs(dirNormalized.x) / Bounds.GetXSize(),
+                              BasicMath::Abs(dirNormalized.y) / Bounds.GetYSize(),
+                              BasicMath::Abs(dirNormalized.z) / Bounds.GetZSize());
+
+    //On X face.
+    if (absDirNormalized.x > absDirNormalized.y && absDirNormalized.x > absDirNormalized.z)
+    {
+        return GeometricMath::GetPointOnLineAtValue(GetCenter(), dirNormalized, 0,
+                                                    Bounds.GetCenterX() + (BasicMath::Sign(dirNormalized.x) * 0.5f * Bounds.GetXSize())).Point;
+    }
+    //On Y face.
+    else if (absDirNormalized.y > absDirNormalized.x && absDirNormalized.y > absDirNormalized.z)
+    {
+        return GeometricMath::GetPointOnLineAtValue(GetCenter(), dirNormalized, 1,
+                                                    Bounds.GetCenterY() + (BasicMath::Sign(dirNormalized.y) * 0.5f * Bounds.GetYSize())).Point;
+    }
+    //On Z face.
+    else
+    {
+        return GeometricMath::GetPointOnLineAtValue(GetCenter(), dirNormalized, 2,
+                                                    Bounds.GetCenterZ() + (BasicMath::Sign(dirNormalized.z) * 0.5f * Bounds.GetZSize())).Point;
+    }
+}
+
 bool Cube::TouchingSphere(const Sphere & sphere) const
 {
 	Vector3f s1 = Bounds.GetMinCorner(),
@@ -131,8 +157,7 @@ bool Sphere::TouchingCapsule(const Capsule & capsule) const
 {
 	Vector3f capPoint = GeometricMath::ClosestToLine(capsule.GetEndpoint1(), capsule.GetEndpoint2(), GetCenter(), false);
 
-	return capPoint.DistanceSquared(GetCenter()) <=
-           (BasicMath::Square(Radius) + BasicMath::Square(capsule.Radius));
+	return capPoint.DistanceSquared(GetCenter()) <= BasicMath::Square(Radius + capsule.Radius);
 }
 bool Sphere::TouchingPlane(const Plane & plane) const
 {
@@ -213,8 +238,7 @@ bool Capsule::TouchingSphere(const Sphere & sphere) const
 {
 	Vector3f capPoint = GeometricMath::ClosestToLine(l1, l2, sphere.GetCenter(), false);
 	
-	return capPoint.DistanceSquared(sphere.GetCenter()) <=
-           (BasicMath::Square(sphere.Radius) + BasicMath::Square(Radius));
+	return capPoint.DistanceSquared(sphere.GetCenter()) <= BasicMath::Square(sphere.Radius + Radius);
 }
 bool Capsule::TouchingCapsule(const Capsule & capsule) const
 {

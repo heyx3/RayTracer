@@ -88,13 +88,7 @@ public:
     Cube(const Box3D & toCopy) : Shape(toCopy.GetCenter()), Bounds(toCopy) { }
 
 
-    virtual Vector3f FarthestPointInDirection(Vector3f dirNormalized) const override
-    {
-        //TODO: Fix -- point must be exactly along vector.
-        return Vector3f(Bounds.GetCenterX() + (BasicMath::Sign(dirNormalized.x) * 0.5f * Bounds.GetXSize()),
-                        Bounds.GetCenterY() + (BasicMath::Sign(dirNormalized.y) * 0.5f * Bounds.GetYSize()),
-                        Bounds.GetCenterZ() + (BasicMath::Sign(dirNormalized.z) * 0.5f * Bounds.GetZSize()));
-    }
+    virtual Vector3f FarthestPointInDirection(Vector3f dirNormalized) const override;
 
 	virtual bool TouchingShape(const Shape & shape) const override { return shape.TouchingCube(*this); }
 
