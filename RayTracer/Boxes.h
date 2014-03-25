@@ -120,7 +120,7 @@ public:
     }
     //Makes a rectangle from the given border values.
     Box3D(float minX, float maxX, float minY, float maxY, float minZ, float maxZ)
-        : Box3D(minX, minY, minZ, Vector3f(maxX - minX, minY - maxY, maxZ - minZ))
+        : Box3D(minX, minY, minZ, Vector3f(maxX - minX, maxY - minY, maxZ - minZ))
     {
 
     }

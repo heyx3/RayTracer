@@ -33,8 +33,8 @@ void RayTracerWorld::InitializeWorld(void)
 	screenSpr = new sf::Sprite();
 
 	//Create the shapes to ray-trace.
-    shapes.insert(shapes.end(), Object(std::shared_ptr<Shape>(new Cube(Vector3f(0, 0, 0), Vector3f(1, 1, 1))), Vector3b(255, 255, 50)));
-	shapes.insert(shapes.end(), Object(std::shared_ptr<Shape>(new Sphere(Vector3f(), 100.0f)), Vector3b(255, 255, 255)));
+    shapes.insert(shapes.end(), Object(std::shared_ptr<Shape>(new Cube(Vector3f(7.0f, 0.0f, 0.0f), Vector3f(10, 10, 10))), Vector3b(255, 255, 50)));
+	shapes.insert(shapes.end(), Object(std::shared_ptr<Shape>(new Sphere(Vector3f(), 1.0f)), Vector3b(50, 50, 255)));
     tracerCirc = new Sphere(Vector3f(), 2.5f);
     shapes.insert(shapes.end(), Object(std::shared_ptr<Shape>(tracerCirc), Vector3b(255, 255, 255)));
     isShapeTouching.insert(isShapeTouching.end(), false);
@@ -42,7 +42,7 @@ void RayTracerWorld::InitializeWorld(void)
     isShapeTouching.insert(isShapeTouching.end(), false);
 
 	//Set up the camera.
-	Vector3f cPos(-100, -100, 100);
+	Vector3f cPos(-10, -10, 10);
 	cam.SetPosition(cPos);
 	cam.SetRotation(-cPos, Vector3f(0, 0, 1), false);
 	cam.Info.FOV = 3.14159f * 0.25f;
@@ -84,18 +84,19 @@ void RayTracerWorld::UpdateWorld(float elapsedSeconds)
 		EndWorld();
 	}
 
+    const float moveScale = 0.25f;
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::I))
-        shapes[0].shape->SetCenter(shapes[0].shape->GetCenter() + Vector3f(1.0f, 0.0f, 0.0f));
+        shapes[0].shape->SetCenter(shapes[0].shape->GetCenter() + Vector3f(moveScale, 0.0f, 0.0f));
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::K))
-        shapes[0].shape->SetCenter(shapes[0].shape->GetCenter() + Vector3f(-1.0f, 0.0f, 0.0f));
+        shapes[0].shape->SetCenter(shapes[0].shape->GetCenter() + Vector3f(-moveScale, 0.0f, 0.0f));
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::J))
-        shapes[0].shape->SetCenter(shapes[0].shape->GetCenter() + Vector3f(0.0f, -1.0f, 0.0f));
+        shapes[0].shape->SetCenter(shapes[0].shape->GetCenter() + Vector3f(0.0f, -moveScale, 0.0f));
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::L))
-        shapes[0].shape->SetCenter(shapes[0].shape->GetCenter() + Vector3f(0.0f, 1.0f, 0.0f));
+        shapes[0].shape->SetCenter(shapes[0].shape->GetCenter() + Vector3f(0.0f, moveScale, 0.0f));
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::U))
-        shapes[0].shape->SetCenter(shapes[0].shape->GetCenter() + Vector3f(0.0f, 0.0f, 1.0f));
+        shapes[0].shape->SetCenter(shapes[0].shape->GetCenter() + Vector3f(0.0f, 0.0f, moveScale));
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::O))
-        shapes[0].shape->SetCenter(shapes[0].shape->GetCenter() + Vector3f(0.0f, 0.0f, -1.0f));
+        shapes[0].shape->SetCenter(shapes[0].shape->GetCenter() + Vector3f(0.0f, 0.0f, -moveScale));
 
 
 	int * toChange = &centerWeight;
@@ -393,7 +394,11 @@ void RayTracerWorld::RenderWorld(float elapsedSeconds)
 	RenderSettings::Clearable toClear[2] = { RenderSettings::Clearable::COLOR, RenderSettings::Clearable::DEPTH };
 	RenderSettings::ClearScreen(toClear, 2);
 	GetWindow()->draw(*screenSpr);
-	sf::Text t(sf::String(std::string("Blurriness: ") + std::to_string(centerWeight) + ";   FPS: " + std::to_string(avgFPS)), debugFont, 20);
+    sf::Text t(sf::String(std::string() + "FPS: " + std::to_string(avgFPS) +
+                          "\nS1 pos: " + std::to_string(shapes[0].shape->GetCenter().x) + ", " +
+                                         std::to_string(shapes[0].shape->GetCenter().y) + ", " +
+                                         std::to_string(shapes[0].shape->GetCenter().z)),
+               debugFont, 20);
 	t.setColor(sf::Color(128, 128, 128, 255));
 	GetWindow()->draw(t);
 	GetWindow()->display();
