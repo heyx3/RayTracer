@@ -38,7 +38,7 @@ Vector3f Cube::FarthestPointInDirection(Vector3f dirNormalized) const
 
 bool Cube::TouchingSphere(const Sphere & sphere) const
 {
-    //Get the closest point on the cube to the sphere's center and see if it's inside the sphere.
+    //Get the closest point in/on the cube to the sphere's center and see if it's inside the sphere.
     Vector3f clampedToCube = Vector3f(BasicMath::Clamp(sphere.GetCenter().x, Bounds.GetXMin(), Bounds.GetXMax()),
                                       BasicMath::Clamp(sphere.GetCenter().y, Bounds.GetYMin(), Bounds.GetYMax()),
                                       BasicMath::Clamp(sphere.GetCenter().z, Bounds.GetZMin(), Bounds.GetZMax()));
@@ -131,7 +131,7 @@ Cube::RayTraceResult Cube::RayHitCheck(Vector3f rayStart, Vector3f rayDir) const
 
 bool Sphere::TouchingCube(const Cube & cube) const
 {
-    //Get the closest point on the cube to the sphere's center and see if it's inside the sphere.
+    //Get the closest point in/on the cube to the sphere's center and see if it's inside the sphere.
     const Box3D & bounds = cube.GetBounds();
     Vector3f clampedToCube = Vector3f(BasicMath::Clamp(GetCenter().x, bounds.GetXMin(), bounds.GetXMax()),
                                       BasicMath::Clamp(GetCenter().y, bounds.GetYMin(), bounds.GetYMax()),
