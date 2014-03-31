@@ -239,8 +239,18 @@ public:
 
     virtual Vector3f FarthestPointInDirection(Vector3f dirNormalized) const override
     {
-        return (dirNormalized - (Normal * Normal.Dot(dirNormalized))) *
-               std::numeric_limits<float>::max();
+        //The plane is infinite, so this gets a little weird.
+
+        //If the direction is along the plane, return a value in the right direction.
+        float dot = dirNormalized.Dot(Normal);
+        const float marginOfError = 0.001f;
+        if (BasicMath::Abs(dot) < marginOfError)
+        {
+            return GetCenter() + (dirNormalized * std::numeric_limits<float>::infinity());
+        }
+
+        //Otherwise, the only viable value is the plane center.
+        return GetCenter();
     }
 
     virtual bool TouchingShape(const Shape & shape) const override { return shape.TouchingPlane(*this); }

@@ -1,6 +1,5 @@
 #include "ThreeDShapes.h"
 
-//TODO: Finish Capsule::FarthestPointInDirection(), then test it.
 
 bool Shape::TouchingPolygon(const PolygonSolid & poly) const
 {
