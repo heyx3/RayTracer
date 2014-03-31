@@ -164,27 +164,7 @@ public:
     }
 
 
-    virtual Vector3f FarthestPointInDirection(Vector3f dirNormalized) const override
-    {
-        Vector3f alongCapsule = (l2 - l1),
-                 alongCapsuleNorm = alongCapsule.Normalized();
-        float dir_dot_alongCapsule = dirNormalized.Dot(alongCapsuleNorm);
-
-        //If the farthest point is one of the capsule ends, exit early
-        //    (otherwise a divide-by-zero will occur later in this function).
-        if (BasicMath::Abs(dir_dot_alongCapsule) == 1.0f)
-        {
-            return GetCenter() + (alongCapsule * BasicMath::Sign(dir_dot_alongCapsule));
-        }
-
-        //Get the farthest point along the infinite cylinder this capsule is a subset of.
-        Vector3f towardFarthest = alongCapsuleNorm.Cross(dirNormalized).Cross(alongCapsuleNorm);
-        float ratio = Radius / towardFarthest.Dot(dirNormalized);
-        Vector3f farthest = GetCenter() + (dirNormalized * ratio);
-
-        //TODO: Constrain if the point is past the sphere ends.
-        return farthest;
-    }
+    virtual Vector3f FarthestPointInDirection(Vector3f dirNormalized) const override;
 
     virtual bool TouchingShape(const Shape & shape) const override { return shape.TouchingCapsule(*this); }
 	

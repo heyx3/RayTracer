@@ -215,6 +215,34 @@ Sphere::RayTraceResult Sphere::RayHitCheck(Vector3f rayStart, Vector3f rayDir) c
 }
 
 
+Vector3f Capsule::FarthestPointInDirection(Vector3f dirNormalized) const
+{
+    Vector3f alongCapsule = (l2 - l1),
+             alongCapsuleNorm = alongCapsule.Normalized();
+    float dir_dot_alongCapsule = dirNormalized.Dot(alongCapsuleNorm);
+
+    //If the farthest point is one of the capsule ends, exit early
+    //    (otherwise a divide-by-zero will occur later in this function).
+    if (BasicMath::Abs(dir_dot_alongCapsule) == 1.0f)
+    {
+        return GetCenter() + (alongCapsule * BasicMath::Sign(dir_dot_alongCapsule));
+    }
+
+    //Get the farthest point along the infinite cylinder this capsule is a subset of.
+    Vector3f towardFarthest = alongCapsuleNorm.Cross(dirNormalized).Cross(alongCapsuleNorm);
+    float ratio = Radius / towardFarthest.Dot(dirNormalized);
+    Vector3f farthest = GetCenter() + (dirNormalized * ratio);
+
+    //Constrain if the point is past the sphere ends.
+    Vector3f onLine = farthest - (towardFarthest * Radius);
+    float t = (farthest.x - l1.x) / alongCapsule.x;
+    if (t < 0.0f)
+        farthest = Sphere(l1, Radius).FarthestPointInDirection(dirNormalized);
+    else if (t > 0.0f)
+        farthest = Sphere(l2, Radius).FarthestPointInDirection(dirNormalized);
+    return farthest;
+}
+
 bool Capsule::TouchingCube(const Cube & cube) const
 {
 	return false;
