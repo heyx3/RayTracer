@@ -346,6 +346,8 @@ Box3D Capsule::GetBoundingBox(void) const
 }
 
 
+const float Plane::MarginOfError = 0.001f;
+
 bool Plane::TouchingCube(const Cube & cube) const
 {
     //Refer to Cube::TouchingPlane(const Plane & plane) for the info about this formula.
@@ -388,7 +390,7 @@ bool Plane::TouchingPlane(const Plane & plane) const
 	float dot = BasicMath::Round(Normal.Dot(plane.Normal), 2);
 
 	return (dot != 1.0f && dot != -1.0f) ||
-		   (plane.GetCenter().Equals(GetCenter()));
+		   (plane.GetCenter().DistanceSquared(GetCenter()) <= MarginOfError);
 }
 bool Plane::TouchingTriangle(const Triangle & tris) const
 {
@@ -400,19 +402,27 @@ Plane::RayTraceResult Plane::RayHitCheck(Vector3f rayStart, Vector3f rayDir) con
 	float denominator = rayDir.Dot(Normal);
 
 	//If ray is perpendicular to plane, no intersection.
-    if (BasicMath::Abs(denominator - 0.001f) == 0.0f) return RayTraceResult();
+    if (BasicMath::Abs(denominator) <= MarginOfError) return RayTraceResult();
 
-    float t = (GetCenter().Dot(Normal) - rayStart.Dot(Normal)) / denominator;
+    float t = Normal.Dot(GetCenter() - rayStart) / denominator;
     if (t < 0.0f) return RayTraceResult();
 
-    return RayTraceResult(rayStart + (rayDir * t), Normal);
+    return RayTraceResult(rayStart + (rayDir * t), Normal * BasicMath::Sign(GetDistanceToPlane(rayStart)));
 }
 
 Box3D Plane::GetBoundingBox(void) const
 {
     const float min = std::numeric_limits<float>::min(),
                 max = std::numeric_limits<float>::max();
-    return Box3D(min, max, min, max, min, max);
+
+    //If the plane is aligned along an axis, one of the box's dimensions will have 0 size.
+    bool xAligned = (1.0f - BasicMath::Abs(Normal.x)) < MarginOfError,
+         yAligned = (1.0f - BasicMath::Abs(Normal.y)) < MarginOfError,
+         zAligned = (1.0f - BasicMath::Abs(Normal.z)) < MarginOfError;
+
+    return Box3D(xAligned ? GetCenter().x : min, xAligned ? GetCenter().x : max,
+                 yAligned ? GetCenter().y : min, yAligned ? GetCenter().y : max,
+                 zAligned ? GetCenter().z : min, zAligned ? GetCenter().z : max);
 }
 
 

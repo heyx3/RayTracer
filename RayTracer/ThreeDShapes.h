@@ -214,7 +214,11 @@ private:
 class Plane : public Shape
 {
 public:
-    //TODO: Plane math should reflect the fact that the plane is just the surface, not an endless solid below the surface.
+
+
+    //The margin of error for certain plane operations such as "IsPointInside()".
+    static const float MarginOfError;
+
 	Vector3f Normal;
 
     Plane(Vector3f onPlane, Vector3f normal) : Shape(onPlane), Normal(normal) { }
@@ -243,8 +247,7 @@ public:
 
         //If the direction is along the plane, return a value in the right direction.
         float dot = dirNormalized.Dot(Normal);
-        const float marginOfError = 0.001f;
-        if (BasicMath::Abs(dot) < marginOfError)
+        if (BasicMath::Abs(dot) < MarginOfError)
         {
             return GetCenter() + (dirNormalized * std::numeric_limits<float>::infinity());
         }
@@ -265,7 +268,7 @@ public:
 
     virtual bool IsPointInside(Vector3f point) const override
     {
-        return GetDistanceToPlane(point) == 0.0f;
+        return BasicMath::Abs(GetDistanceToPlane(point)) <= MarginOfError;
     }
 
     virtual ShapePtr GetClone(void) const override { return ShapePtr(new Plane(GetCenter(), Normal)); }
