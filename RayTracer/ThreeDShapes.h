@@ -19,12 +19,6 @@ class PolygonSolid;
 //Represents some kind of 3D shape. Uses double dispatch for checking collision against other shapes.
 class Shape
 {
-protected:
-
-    void PrintVector(Vector3f v)
-    {
-    }
-
 public:
 
 	typedef std::shared_ptr<Shape> ShapePtr;
