@@ -241,7 +241,7 @@ bool Capsule::TouchingPlane(const Plane & plane) const
     float distance1 = plane.GetDistanceToPlane(l1),
           distance2 = plane.GetDistanceToPlane(l2);
 
-    Interval distanceIntvl(distance1, distance2, 0.001f, true, true);
+    Interval distanceIntvl(distance1, distance2, Plane::MarginOfError, true, true);
     distanceIntvl = distanceIntvl.Widen(Radius + Radius);
 
     return distanceIntvl.Touches(0.0f);
@@ -380,7 +380,7 @@ bool Plane::TouchingCapsule(const Capsule & capsule) const
     float distance1 = GetDistanceToPlane(capsule.GetEndpoint1()),
           distance2 = GetDistanceToPlane(capsule.GetEndpoint2());
 
-    Interval distanceIntvl(distance1, distance2, 0.001f, true, true);
+    Interval distanceIntvl(distance1, distance2, MarginOfError, true, true);
     distanceIntvl = distanceIntvl.Widen(capsule.Radius + capsule.Radius);
 
     return distanceIntvl.Touches(0.0f);
