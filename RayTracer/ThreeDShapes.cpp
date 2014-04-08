@@ -45,7 +45,254 @@ bool Cube::TouchingSphere(const Sphere & sphere) const
 }
 bool Cube::TouchingCapsule(const Capsule & capsule) const
 {
-	return false;
+    //Use GJK algorithm.
+
+    const Cube * cbe = this;
+    const Capsule & caps = capsule;
+    auto supportFunc = [cbe, caps](Vector3f dir) -> Vector3f
+    {
+        return cbe->FarthestPointInDirection(dir) - caps.FarthestPointInDirection(-dir);
+    };
+
+    auto DoSimplex = [cbe, caps](Vector3f * simplex, int * nVertices, Vector3f * dir) -> bool
+    {
+        if (*nVertices == 2)
+        {
+            Vector3f a = simplex[1],
+                     b = simplex[0];
+            Vector3f a_origin = -a,
+                     a_b = b - a;
+            if (a_origin.Dot(a_b) > 0.0f)
+            {
+                simplex[0] = a;
+                simplex[1] = b;
+                *nVertices = 2;
+                *dir = a_b.Cross(a_origin).Cross(a_b);
+            }
+            else
+            {
+                simplex[0] = a;
+                *nVertices = 1;
+                *dir = a_origin;
+            }
+        }
+        else if (*nVertices == 3)
+        {
+            Vector3f a = simplex[2],
+                     b = simplex[0],
+                     c = simplex[1];
+            Vector3f a_origin = -a,
+                     a_b = b - a,
+                     a_c = c - a,
+                     abc = a_b.Cross(a_c),
+                     a_b_cross = a_b.Cross(abc),
+                     a_c_cross = abc.Cross(a_c);
+            if (a_c_cross.Dot(a_origin) > 0.0f)
+            {
+                if (a_c.Dot(a_origin) > 0.0f)
+                {
+                    simplex[0] = a;
+                    simplex[1] = c;
+                    *nVertices = 2;
+                    *dir = a_c.Cross(a_origin).Cross(a_c);
+                }
+                else
+                {
+                    if (a_b.Dot(a_origin) > 0.0f)
+                    {
+                        simplex[0] = a;
+                        simplex[1] = b;
+                        *nVertices = 2;
+                        *dir = a_b.Cross(a_origin).Cross(a_b);
+                    }
+                    else
+                    {
+                        simplex[0] = a;
+                        *nVertices = 1;
+                        *dir = a_origin;
+                    }
+                }
+            }
+            else
+            {
+                if (a_b_cross.Dot(a_origin) > 0.0f)
+                {
+                    if (a_b.Dot(a_origin) > 0.0f)
+                    {
+                        simplex[0] = a;
+                        simplex[1] = b;
+                        *nVertices = 2;
+                        *dir = a_b.Cross(a_origin).Cross(a_b);
+                    }
+                    else
+                    {
+                        simplex[0] = a;
+                        *nVertices = 1;
+                        *dir = a_origin;
+                    }
+                }
+                else
+                {
+                    if (abc.Dot(a_origin) > 0.0f)
+                    {
+                        simplex[0] = a;
+                        simplex[1] = b;
+                        simplex[2] = c;
+                        *nVertices = 3;
+                        *dir = abc;
+                    }
+                    else
+                    {
+                        simplex[0] = a;
+                        simplex[1] = c;
+                        simplex[2] = b;
+                        *nVertices = 3;
+                        *dir = -abc;
+                    }
+                }
+            }
+        }
+        else if (*nVertices == 4)
+        {
+
+        }
+
+        dir->Normalize();
+    };
+
+    Vector3f seedValue = supportFunc(Vector3f(1.0f, 1.0f, 0.0f).Normalized());
+    Vector3f simplex[4];
+    simplex[0] = seedValue;
+    int nVerts = 1;
+    Vector3f dir = -seedValue;
+
+    while (true)
+    {
+        Vector3f a = supportFunc(dir);
+        if (a.Dot(dir) < 0.0f) return false;
+
+        simplex[nVerts] = a;
+        nVerts += 1;
+
+        if (DoSimplex(simplex, &nVerts, &dir))
+            return true;
+    }
+
+    
+
+
+
+
+
+
+
+    return false;
+
+
+    Vector3f a = capsule.GetEndpoint1(),
+             b = capsule.GetEndpoint2();
+    Vector3f min = Bounds.GetMinCorner(),
+             max = Bounds.GetMaxCorner();
+    float r = capsule.Radius;
+
+    if (BasicMath::Max(a.y, b.y) < min.y || BasicMath::Min(a.y, b.y) > max.y)
+    {
+        if (BasicMath::Abs(a.x - max.x) < r || BasicMath::Abs(a.x - min.x) < r ||
+            BasicMath::Abs(a.z - max.z) < r || BasicMath::Abs(a.z - min.z) < r)
+        {
+            return true;
+        }
+        else return false;
+    }
+    else return (capsule.TouchingSphere(Sphere(a, r)) || capsule.TouchingSphere(Sphere(b, r)));
+
+
+
+    return false;
+
+    //Test a collision for each of the cube's six planes.
+
+    Vector3f center = GetCenter();
+    Vector3f halfDims = Bounds.GetDimensions() * 0.5f;
+
+    for (float sign = -1.0f; sign <= 1.0f; sign += 2.0f)
+    {
+        for (int axis = 0; axis < 3; ++axis)
+        {
+            int axis1 = (axis + 1) % 3,
+                axis2 = (axis + 2) % 3;
+
+            //Calculate the plane.
+            Vector3f planePos = center,
+                     planeNormal = Vector3f();
+            planePos[axis] = center[axis] + (sign * halfDims[axis]);
+            planeNormal[axis] = sign;
+            Plane pl(planePos, planeNormal);
+
+            //If the capsule touches the plane, do more specific tests.
+            if (capsule.TouchingPlane(pl))
+            {
+                //Get the capsule line's intersection with the plane.
+
+                float distL1 = BasicMath::Abs(pl.GetDistanceToPlane(capsule.GetEndpoint1())),
+                      distL2 = BasicMath::Abs(pl.GetDistanceToPlane(capsule.GetEndpoint2()));
+                Vector3f rayStart, rayEnd;
+                if (distL1 > 0.0f)
+                {
+                    if (distL2 > distL1)
+                    {
+                        rayStart = capsule.GetEndpoint2();
+                        rayEnd = capsule.GetEndpoint1();
+                    }
+                    else
+                    {
+                        rayStart = capsule.GetEndpoint1();
+                        rayEnd = capsule.GetEndpoint2();
+                    }
+                }
+                else
+                {
+                    if (distL2 > distL1)
+                    {
+                        rayStart = capsule.GetEndpoint1();
+                        rayEnd = capsule.GetEndpoint2();
+                    }
+                    else
+                    {
+                        rayStart = capsule.GetEndpoint2();
+                        rayEnd = capsule.GetEndpoint1();
+                    }
+                }
+
+                RayTraceResult intersect = pl.RayHitCheck(rayStart, (rayEnd - rayStart).Normalized());
+
+
+            }
+        }
+
+        /*
+
+        faces = center + (Bounds.GetDimensions() * sign);
+
+        //X plane.
+        if (capsule.TouchingPlane(Plane(Vector3f(faces.x, center.y, center.z), Vector3f(sign * 1.0f, 0.0f, 0.0f))))
+        {
+            
+        }
+
+        //Y plane.
+        if (capsule.TouchingPlane(Plane(Vector3f(center.x, faces.y, center.z), Vector3f(0.0f, sign * 1.0f, 0.0f))))
+        {
+
+        }
+
+        //Z plane.
+        if (capsule.TouchingPlane(Plane(Vector3f(center.x, center.y, faces.z), Vector3f(0.0f, 0.0f, sign * 1.0f))))
+        {
+
+        }
+        */
+    }
 }
 bool Cube::TouchingPlane(const Plane & plane) const
 {
@@ -112,13 +359,9 @@ Cube::RayTraceResult Cube::RayHitCheck(Vector3f rayStart, Vector3f rayDir) const
             tempDistSqre = rayStart.DistanceSquared(faceIntersectData[axis].Point);
             if (tempDistSqre < closestDistSqr)
             {
-                res = RayTraceResult(faceIntersectData[axis].Point, Vector3f());
+                res = RayTraceResult(faceIntersectData[axis].Point, Vector3f(), faceIntersectData[axis].t);
                 closestDistSqr = tempDistSqre;
                 closestAxis = axis;
-            }
-            else
-            {
-
             }
         }
     }
@@ -209,7 +452,7 @@ Sphere::RayTraceResult Sphere::RayHitCheck(Vector3f rayStart, Vector3f rayDir) c
 		if (t < 0.0f) return RayTraceResult();
 
 		Vector3f p = (rayStart + (rayDir * t));
-		return RayTraceResult(p, (p - cent).Normalized());
+		return RayTraceResult(p, (p - cent).Normalized(), t);
 	}
 }
 
@@ -305,7 +548,7 @@ Capsule::RayTraceResult Capsule::RayHitCheck(Vector3f rayStart, Vector3f rayDir)
     else
     {
         Vector3f point = rayStart + (rayDir * t1);
-        intersect1 = RayTraceResult(point, (point - (l1 + (aToB * capsuleT1))).Normalized());
+        intersect1 = RayTraceResult(point, (point - (l1 + (aToB * capsuleT1))).Normalized(), t1);
     }
 
     if (capsuleT2 < 0.0f)
@@ -323,7 +566,7 @@ Capsule::RayTraceResult Capsule::RayHitCheck(Vector3f rayStart, Vector3f rayDir)
     else
     {
         Vector3f point = rayStart + (rayDir * t2);
-        intersect2 = RayTraceResult(point, (point - (l1 + (aToB * capsuleT2))).Normalized());
+        intersect2 = RayTraceResult(point, (point - (l1 + (aToB * capsuleT2))).Normalized(), t2);
     }
 
 
@@ -407,7 +650,7 @@ Plane::RayTraceResult Plane::RayHitCheck(Vector3f rayStart, Vector3f rayDir) con
     float t = Normal.Dot(GetCenter() - rayStart) / denominator;
     if (t < 0.0f) return RayTraceResult();
 
-    return RayTraceResult(rayStart + (rayDir * t), Normal * BasicMath::Sign(GetDistanceToPlane(rayStart)));
+    return RayTraceResult(rayStart + (rayDir * t), Normal * BasicMath::Sign(GetDistanceToPlane(rayStart)), t);
 }
 
 Box3D Plane::GetBoundingBox(void) const

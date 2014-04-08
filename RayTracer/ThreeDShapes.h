@@ -46,8 +46,10 @@ public:
 	{
 		bool DidHitTarget;
 		Vector3f HitPos;
+        //HitPos = [ray start] + ([ray direction] * HitT)
+        float HitT;
 		Vector3f ReflectNormal;
-		RayTraceResult(Vector3f hitPos, Vector3f refNormal) : HitPos(hitPos), ReflectNormal(refNormal), DidHitTarget(true) { }
+		RayTraceResult(Vector3f hitPos, Vector3f refNormal, float hitT) : HitPos(hitPos), ReflectNormal(refNormal), HitT(hitT), DidHitTarget(true) { }
 		RayTraceResult(bool didHitTarget = false) : DidHitTarget(didHitTarget) { }
 	};
 	virtual RayTraceResult RayHitCheck(Vector3f rayStart, Vector3f rayDir) const = 0;
