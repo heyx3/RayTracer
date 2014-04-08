@@ -30,8 +30,6 @@ private:
 
 	void DeleteData(void);
 
-	void ApplyAntialias(void);
-
 	//Sets up all the necessary threads for ray tracing and waits until they are done running.
 	void SetUpThreads(Vector3f incrementX, Vector3f incrementY, Vector3f topLeftScreen);
 	//Traces the given collection of pixel rays through the world and puts their colors into the "pixels" array.

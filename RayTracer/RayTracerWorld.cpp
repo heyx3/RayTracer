@@ -33,8 +33,8 @@ void RayTracerWorld::InitializeWorld(void)
 	screenSpr = new sf::Sprite();
 
 	//Create the shapes to ray-trace.
-    shapes.insert(shapes.end(), Object(std::shared_ptr<Shape>(new Cube(Vector3f(), Vector3f(2, 2, 2))), Vector3b(255, 255, 50)));
-	shapes.insert(shapes.end(), Object(std::shared_ptr<Shape>(new Capsule(Vector3f(5.0f, 0.0f, 0.0f), Vector3f(-5.0f, 0.0f, 0.0f), 2.5f)), Vector3b(50, 50, 255)));
+    shapes.insert(shapes.end(), Object(std::shared_ptr<Shape>(new Cube(Vector3f(), Vector3f(8, 8, 8))), Vector3b(255, 255, 50)));
+	shapes.insert(shapes.end(), Object(std::shared_ptr<Shape>(new Capsule(Vector3f(5.0f, 5.0f, 5.0f), Vector3f(-5.0f, -5.0f, -5.0f), 2.5f)), Vector3b(50, 50, 255)));
     tracerCirc = new Sphere(Vector3f(1000, 1000, 1000), 2.5f);
     shapes.insert(shapes.end(), Object(std::shared_ptr<Shape>(tracerCirc), Vector3b(255, 255, 255)));
     isShapeTouching.insert(isShapeTouching.end(), false);
@@ -255,56 +255,6 @@ void RayTracerWorld::TracePixelColumns(int firstCol, int lastCol, Vector3f incre
 	}
 }
 
-void RayTracerWorld::ApplyAntialias(void)
-{
-    return;
-
-
-
-	Vector3i sum;
-	int numbSamples;
-	int x, y, x2, y2;
-	sf::Uint8 * pixel;
-	//TODO: Should be doing this operation on a new array and copying the data over!
-	for (x = 0; x < ScreenSize.x; ++x)
-	{
-		for (y = 0; y < ScreenSize.y; ++y)
-		{
-			sum = Vector3i(0, 0, 0);
-			numbSamples = 0;
-
-			for (x2 = -sampleSize; x2 <= sampleSize; ++x2) if (x + x2 >= 0 && x + x2 < ScreenSize.x)
-			{
-				for (y2 = -sampleSize; y2 <= sampleSize; ++y2) if (y + y2 >= 0 && y + y2 < ScreenSize.y)
-				{
-					pixel = GetPixelStart(x + x2, y + y2);
-					sum.x += pixel[0];
-					sum.y += pixel[1];
-					sum.z += pixel[2];
-
-					numbSamples += 1;
-
-					//Add some extra weight to the actual center pixel by sampling it multiple times.
-					if (x2 == 0 && y2 == 0)
-					{
-						sum.x += centerWeight * pixel[0];
-						sum.y += centerWeight * pixel[1];
-						sum.z += centerWeight * pixel[2];
-
-						numbSamples += centerWeight;
-					}
-				}
-			}
-
-			sum /= numbSamples;
-			pixel = GetPixelStart(x, y);
-			pixel[0] = sum.x;
-			pixel[1] = sum.y;
-			pixel[2] = sum.z;
-		}
-	}
-}
-
 void RayTracerWorld::SetUpThreads(Vector3f incrementX, Vector3f incrementY, Vector3f topLeftScreen)
 {
 	int colsPerThread = ScreenSize.x / numbThreads;
@@ -371,7 +321,6 @@ void RayTracerWorld::RenderWorld(float elapsedSeconds)
 
 				pixel = GetPixelStart(x, y);
 				pixelCol = TracePixel(counter, (counter - camPos).Normalized(), x, y);
-				//memcpy((void*)pixel, (void*)(&pixelCol), sizeof(Vector3b));
 				pixel[0] = pixelCol.x;
 				pixel[1] = pixelCol.y;
 				pixel[2] = pixelCol.z;
@@ -380,8 +329,6 @@ void RayTracerWorld::RenderWorld(float elapsedSeconds)
 		}
 	}
 	else SetUpThreads(incrementX, incrementY, topLeftScreen);
-	
-	ApplyAntialias();
 
 	//Output the values to a Sprite class for drawing.
 	screenTex->update(pixels);
@@ -394,13 +341,13 @@ void RayTracerWorld::RenderWorld(float elapsedSeconds)
 	RenderSettings::Clearable toClear[2] = { RenderSettings::Clearable::COLOR, RenderSettings::Clearable::DEPTH };
 	RenderSettings::ClearScreen(toClear, 2);
 	GetWindow()->draw(*screenSpr);
-    sf::Text t(sf::String(std::string() + "FPS: " + std::to_string(avgFPS) +
-                          "\nS1 pos: " + std::to_string(shapes[0].shape->GetCenter().x) + ", " +
-                                         std::to_string(shapes[0].shape->GetCenter().y) + ", " +
-                                         std::to_string(shapes[0].shape->GetCenter().z)),
-               debugFont, 20);
-	t.setColor(sf::Color(128, 128, 128, 255));
-	GetWindow()->draw(t);
+    if (GetTotalElapsedSeconds() > 1.0f)
+    {
+        sf::Text t(sf::String(std::string() + "FPS: " + std::to_string(avgFPS)),
+                   debugFont, 20);
+        t.setColor(sf::Color(128, 128, 128, 255));
+        GetWindow()->draw(t);
+    }
 	GetWindow()->display();
 }
 
