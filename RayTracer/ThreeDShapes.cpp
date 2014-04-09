@@ -1,5 +1,7 @@
 #include "ThreeDShapes.h"
 
+#include <assert.h>
+
 
 bool Shape::TouchingPolygon(const PolygonSolid & poly) const
 {
@@ -16,13 +18,13 @@ Vector3f Cube::FarthestPointInDirection(Vector3f dirNormalized) const
                               BasicMath::Abs(dirNormalized.z) / Bounds.GetZSize());
 
     //On X face.
-    if (absDirNormalized.x > absDirNormalized.y && absDirNormalized.x > absDirNormalized.z)
+    if (absDirNormalized.x >= absDirNormalized.y && absDirNormalized.x >= absDirNormalized.z)
     {
         return GeometricMath::GetPointOnLineAtValue(GetCenter(), dirNormalized, 0,
                                                     Bounds.GetCenterX() + (BasicMath::Sign(dirNormalized.x) * 0.5f * Bounds.GetXSize())).Point;
     }
     //On Y face.
-    else if (absDirNormalized.y > absDirNormalized.x && absDirNormalized.y > absDirNormalized.z)
+    else if (absDirNormalized.y >= absDirNormalized.x && absDirNormalized.y >= absDirNormalized.z)
     {
         return GeometricMath::GetPointOnLineAtValue(GetCenter(), dirNormalized, 1,
                                                     Bounds.GetCenterY() + (BasicMath::Sign(dirNormalized.y) * 0.5f * Bounds.GetYSize())).Point;
@@ -30,6 +32,7 @@ Vector3f Cube::FarthestPointInDirection(Vector3f dirNormalized) const
     //On Z face.
     else
     {
+        assert(absDirNormalized.z > absDirNormalized.x && absDirNormalized.z > absDirNormalized.y);
         return GeometricMath::GetPointOnLineAtValue(GetCenter(), dirNormalized, 2,
                                                     Bounds.GetCenterZ() + (BasicMath::Sign(dirNormalized.z) * 0.5f * Bounds.GetZSize())).Point;
     }
@@ -45,8 +48,198 @@ bool Cube::TouchingSphere(const Sphere & sphere) const
 }
 bool Cube::TouchingCapsule(const Capsule & capsule) const
 {
-    //Use GJK algorithm.
+    //GJK algorithm. http://vec3.ca/gjk/implementation/
+    //TODO: Abstract out to GeometricMath, or even a standalone class.
 
+    if (GetCenter() == capsule.GetCenter()) return true;
+
+    const Cube * cbe = this;
+    const Capsule & caps = capsule;
+    auto supportFunc = [cbe, caps](Vector3f dir) -> Vector3f
+    {
+        return cbe->FarthestPointInDirection(dir) - caps.FarthestPointInDirection(-dir);
+    };
+    auto crossABA = [](Vector3f a, Vector3f b) -> Vector3f { return a.Cross(b).Cross(a); };
+    Vector3f b, c, d,
+             v;
+    int n;
+
+    auto DoSimplex = [cbe, caps, &b, &c, &d, &v, &n, crossABA](Vector3f a) -> bool
+    {
+        if (n == 0)
+        {
+            b = a;
+            v = -a;
+            n = 1;
+        }
+        else if (n == 1)
+        {
+            v = crossABA(b - a, -a);
+
+            c = b;
+            b = a;
+            n = 2;
+        }
+        else if (n == 2)
+        {
+            Vector3f ao = -a,
+                     ab = b - a,
+                     ac = c - a;
+
+            Vector3f abc = ab.Cross(ac),
+                     abp = ab.Cross(abc);
+
+            if (abp.Dot(ao) > 0.0f)
+            {
+                c = b;
+                b = a;
+                v = crossABA(ab, ao);
+            }
+            else
+            {
+                Vector3f acp = abc.Cross(ac);
+                if (acp.Dot(ao) > 0.0f)
+                {
+                    b = a;
+                    v = crossABA(ac, ao);
+                }
+                else
+                {
+                    n = 3;
+
+                    if (abc.Dot(ao) > 0.0f)
+                    {
+                        d = c;
+                        c = b;
+                        b = a;
+
+                        v = abc;
+                    }
+                    else
+                    {
+                        d = b;
+                        b = a;
+
+                        v = -abc;
+                    }
+                }
+            }
+        }
+        else if (n == 3)
+        {
+            Vector3f ao = -a,
+                     ab = b - a,
+                     ac = c - a;
+            Vector3f abc = ab.Cross(ac);
+            Vector3f ad, acd, adb;
+
+            if (abc.Dot(ao) > 0.0f)
+            {
+                goto checkFace;
+            }
+
+            ad = d - a;
+            acd = ac.Cross(ad);
+            if (acd.Dot(ao) > 0.0f)
+            {
+                b = c;
+                c = d;
+
+                ab = ac;
+                ac = ad;
+                abc = acd;
+
+                goto checkFace;
+            }
+
+            adb = ad.Cross(ab);
+            if (adb.Dot(ao) > 0.0f)
+            {
+                c = b;
+                b = d;
+
+                ac = ab;
+                ab = ad;
+
+                abc = adb;
+
+                goto checkFace;
+            }
+
+            return true;
+
+        checkFace:
+
+            Vector3f abp = ab.Cross(abc);
+
+            if (abp.Dot(ao) > 0)
+            {
+                c = b;
+                b = a;
+
+                v = crossABA(ab, ao);
+
+                n = 2;
+            }
+            else
+            {
+                Vector3f acp = abc.Cross(ac);
+                if (acp.Dot(ao) > 0.0f)
+                {
+                    b = a;
+
+                    v = crossABA(ac, ao);
+
+                    n = 2;
+                }
+                else
+                {
+                    d = c;
+                    c = b;
+                    b = a;
+
+                    v = abc;
+
+                    n = 3;
+                }
+            }
+        }
+
+        return false;
+    };
+
+    v = Vector3f(1.0f, 0.0f, 0.0f);
+    n = 0;
+
+    //Normally you should loop infinitely, but thanks to floating point error,
+    //    we might get caught in an infinte loop.
+    for (unsigned int i = 0; i < 10; ++i)
+    {
+        Vector3f a = supportFunc(v);
+
+        if (a.Dot(v) < 0.0f) return false;
+
+        if (DoSimplex(a)) return true;
+
+        v.Normalize();
+    }
+
+    //If the loop never managed to exit, it's very likely that this was an intersection.
+    return true;
+
+
+
+
+
+
+
+
+
+
+
+
+    //Use GJK algorithm.
+    /*
     const Cube * cbe = this;
     const Capsule & caps = capsule;
     auto supportFunc = [cbe, caps](Vector3f dir) -> Vector3f
@@ -154,13 +347,92 @@ bool Cube::TouchingCapsule(const Capsule & capsule) const
         }
         else if (*nVertices == 4)
         {
+            //Sorry about the "gotos", but this function is already a nightmare.
+            Vector3f a = simplex[3],
+                     b = simplex[2],
+                     c = simplex[1],
+                     d = simplex[0];
+            Vector3f a_origin = -a,
+                     a_b = b - a,
+                     a_c = c - a,
+                     abc = a_b.Cross(a_c);
+            Vector3f a_d, acd, adb;
 
+            if (abc.Dot(a_origin) > 0.0f)
+                goto checkFace;
+
+            a_d = d - a;
+            acd = a_c.Cross(a_d);
+            if (acd.Dot(a_origin) > 0.0f)
+            {
+                b = c;
+                c = d;
+                a_b = a_c;
+                a_c = a_d;
+
+                abc = acd;
+
+                goto checkFace;
+            }
+
+            adb = a_d.Cross(a_b);
+            if (adb.Dot(a_origin) > 0.0f)
+            {
+                c = b;
+                b = d;
+                a_c = a_b;
+                a_b = a_d;
+
+                abc = adb;
+
+                goto checkFace;
+            }
+
+            dir->Normalize();
+            return true;
+
+        checkFace:
+
+            //We have a CCW-wound triangle ABC. The point is in front of it.
+            //It is NOT "below" BC or "above" the plane through A parallel to BC.
+
+            Vector3f abp = a_b.Cross(abc);
+
+            if (abp.Dot(a_origin) > 0.0f)
+            {
+                simplex[1] = a;
+                simplex[0] = b;
+                *nVertices = 2;
+                *dir = a_b.Cross(a_origin);
+
+                return false;
+            }
+
+            Vector3f acp = abc.Cross(a_c);
+            if (acp.Dot(a_origin) > 0.0f)
+            {
+                simplex[0] = c;
+                simplex[1] = a;
+                *nVertices = 2;
+                *dir = a_c.Cross(a_origin);
+
+                return false;
+            }
+
+            simplex[2] = a;
+            simplex[1] = b;
+            simplex[0] = c;
+            *nVertices = 3;
+            *dir = abc;
+
+            return false;
         }
 
-        dir->Normalize();
+        return false;
     };
 
-    Vector3f seedValue = supportFunc(Vector3f(1.0f, 1.0f, 0.0f).Normalized());
+    Vector3f startDir(1.0f, 0.0f, 0.0f);
+    Vector3f seedValue = supportFunc(startDir);
     Vector3f simplex[4];
     simplex[0] = seedValue;
     int nVerts = 1;
@@ -169,7 +441,9 @@ bool Cube::TouchingCapsule(const Capsule & capsule) const
     while (true)
     {
         Vector3f a = supportFunc(dir);
-        if (a.Dot(dir) < 0.0f) return false;
+
+        if (a.Dot(dir) < 0.0f)
+            return false;
 
         simplex[nVerts] = a;
         nVerts += 1;
@@ -177,7 +451,6 @@ bool Cube::TouchingCapsule(const Capsule & capsule) const
         if (DoSimplex(simplex, &nVerts, &dir))
             return true;
     }
-
     
 
 
@@ -270,8 +543,6 @@ bool Cube::TouchingCapsule(const Capsule & capsule) const
             }
         }
 
-        /*
-
         faces = center + (Bounds.GetDimensions() * sign);
 
         //X plane.
@@ -291,8 +562,8 @@ bool Cube::TouchingCapsule(const Capsule & capsule) const
         {
 
         }
-        */
     }
+        */
 }
 bool Cube::TouchingPlane(const Plane & plane) const
 {
@@ -459,12 +730,186 @@ Sphere::RayTraceResult Sphere::RayHitCheck(Vector3f rayStart, Vector3f rayDir) c
 
 Vector3f Capsule::FarthestPointInDirection(Vector3f dirNormalized) const
 {
-    return RayHitCheck(GetCenter() + (dirNormalized * (l2 - l1).Length()), -dirNormalized).HitPos;
+    return RayHitCheck(GetCenter() + (dirNormalized * (l2 - l1).LengthSquared()), -dirNormalized).HitPos;
 }
 
 bool Capsule::TouchingCube(const Cube & cube) const
 {
-	return false;
+    if (cube.GetCenter() == GetCenter()) return true;
+
+    const Cube & cbe = cube;
+    const Capsule * caps = this;
+    auto supportFunc = [cbe, caps](Vector3f dir) -> Vector3f
+    {
+        return cbe.FarthestPointInDirection(dir) - caps->FarthestPointInDirection(-dir);
+    };
+    auto crossABA = [](Vector3f a, Vector3f b) -> Vector3f { return a.Cross(b).Cross(a); };
+    Vector3f b, c, d,
+        v;
+    int n;
+
+    auto DoSimplex = [cbe, caps, &b, &c, &d, &v, &n, crossABA](Vector3f a) -> bool
+    {
+        if (n == 0)
+        {
+            b = a;
+            v = -a;
+            n = 1;
+        }
+        else if (n == 1)
+        {
+            v = crossABA(b - a, -a);
+
+            c = b;
+            b = a;
+            n = 2;
+        }
+        else if (n == 2)
+        {
+            Vector3f ao = -a,
+                ab = b - a,
+                ac = c - a;
+
+            Vector3f abc = ab.Cross(ac),
+                abp = ab.Cross(abc);
+
+            if (abp.Dot(ao) > 0.0f)
+            {
+                c = b;
+                b = a;
+                v = crossABA(ab, ao);
+            }
+            else
+            {
+                Vector3f acp = abc.Cross(ac);
+                if (acp.Dot(ao) > 0.0f)
+                {
+                    b = a;
+                    v = crossABA(ac, ao);
+                }
+                else
+                {
+                    n = 3;
+
+                    if (abc.Dot(ao) > 0.0f)
+                    {
+                        d = c;
+                        c = b;
+                        b = a;
+
+                        v = abc;
+                    }
+                    else
+                    {
+                        d = b;
+                        b = a;
+
+                        v = -abc;
+                    }
+                }
+            }
+        }
+        else if (n == 3)
+        {
+            Vector3f ao = -a,
+                ab = b - a,
+                ac = c - a;
+            Vector3f abc = ab.Cross(ac);
+            Vector3f ad, acd, adb;
+
+            if (abc.Dot(ao) > 0.0f)
+            {
+                goto checkFace;
+            }
+
+            ad = d - a;
+            acd = ac.Cross(ad);
+            if (acd.Dot(ao) > 0.0f)
+            {
+                b = c;
+                c = d;
+
+                ab = ac;
+                ac = ad;
+                abc = acd;
+
+                goto checkFace;
+            }
+
+            adb = ad.Cross(ab);
+            if (adb.Dot(ao) > 0.0f)
+            {
+                c = b;
+                b = d;
+
+                ac = ab;
+                ab = ad;
+
+                abc = adb;
+
+                goto checkFace;
+            }
+
+            return true;
+
+        checkFace:
+
+            Vector3f abp = ab.Cross(abc);
+
+            if (abp.Dot(ao) > 0)
+            {
+                c = b;
+                b = a;
+
+                v = crossABA(ab, ao);
+
+                n = 2;
+            }
+            else
+            {
+                Vector3f acp = abc.Cross(ac);
+                if (acp.Dot(ao) > 0.0f)
+                {
+                    b = a;
+
+                    v = crossABA(ac, ao);
+
+                    n = 2;
+                }
+                else
+                {
+                    d = c;
+                    c = b;
+                    b = a;
+
+                    v = abc;
+
+                    n = 3;
+                }
+            }
+        }
+
+        return false;
+    };
+
+    v = Vector3f(1.0f, 0.0f, 0.0f);
+    n = 0;
+
+    //Normally you should loop infinitely, but thanks to floating point error,
+    //    we might get caught in an infinte loop.
+    for (unsigned int i = 0; i < 10; ++i)
+    {
+        Vector3f a = supportFunc(v);
+
+        if (a.Dot(v) < 0.0f) return false;
+
+        if (DoSimplex(a)) return true;
+
+        v.Normalize();
+    }
+
+    //If the loop never managed to exit, it's very likely that this was an intersection.
+    return true;
 }
 bool Capsule::TouchingSphere(const Sphere & sphere) const
 {
@@ -496,6 +941,8 @@ bool Capsule::TouchingTriangle(const Triangle & tris) const
 
 Capsule::RayTraceResult Capsule::RayHitCheck(Vector3f rayStart, Vector3f rayDir) const
 {
+    //TODO: The ray fails if cast through the ends of the capsule.
+
     //Taken from http://blog.makingartstudios.com/?p=286
 
     //l1 is 'a', l2 is 'b'.

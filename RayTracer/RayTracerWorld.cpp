@@ -5,7 +5,7 @@
 #include <thread>
 
 Vector2i RayTracerWorld::ScreenSize = Vector2i(500, 500);
-const Vector3b RayTracerWorld::screenClearColor = Vector3b(0, 0, 0);
+const Vector3b RayTracerWorld::screenClearColor = Vector3b(0.0f, 0.0f, 0.0f);
 
 void RayTracerWorld::DeleteData(void)
 {
@@ -33,10 +33,10 @@ void RayTracerWorld::InitializeWorld(void)
 	screenSpr = new sf::Sprite();
 
 	//Create the shapes to ray-trace.
-    shapes.insert(shapes.end(), Object(std::shared_ptr<Shape>(new Cube(Vector3f(), Vector3f(8, 8, 8))), Vector3b(255, 255, 50)));
-	shapes.insert(shapes.end(), Object(std::shared_ptr<Shape>(new Capsule(Vector3f(5.0f, 5.0f, 5.0f), Vector3f(-5.0f, -5.0f, -5.0f), 2.5f)), Vector3b(50, 50, 255)));
-    tracerCirc = new Sphere(Vector3f(1000, 1000, 1000), 2.5f);
-    shapes.insert(shapes.end(), Object(std::shared_ptr<Shape>(tracerCirc), Vector3b(255, 255, 255)));
+	shapes.insert(shapes.end(), Object(std::shared_ptr<Shape>(new Capsule(Vector3f(5.0f, 0.0f, 0.0f), Vector3f(-5.0f, 0.0f, 0.0f), 1.25f)), Vector3b((unsigned char)50, 50, 255)));
+    shapes.insert(shapes.end(), Object(std::shared_ptr<Shape>(new Cube(Vector3f(), Vector3f(20, 20, 20))), Vector3b((unsigned char)255, 255, 50)));
+    tracerCirc = new Sphere(Vector3f(1000, 1000, 1000), 1.25f);
+    shapes.insert(shapes.end(), Object(std::shared_ptr<Shape>(tracerCirc), Vector3b((unsigned char)255, 255, 255)));
     isShapeTouching.insert(isShapeTouching.end(), false);
     isShapeTouching.insert(isShapeTouching.end(), false);
     isShapeTouching.insert(isShapeTouching.end(), false);
@@ -222,7 +222,7 @@ Vector3b RayTracerWorld::TracePixel(Vector3f pixelStart, Vector3f pixelDir, int 
 		float lightScale = GetLightValue(traces[closestResult].ReflectNormal, traces[closestResult].HitPos, cam.GetPosition(), (pixelX == ScreenSize.x / 2) && (pixelY == ScreenSize.y / 2));
 		Vector3b col = shapes[closestResult].color;
         if (isShapeTouching[closestResult])
-            col = Vector3b(255, 0, 0);
+            col = Vector3b((unsigned char)255, 0, 0);
 		return Vector3b((unsigned char)(col.x * lightScale),
 						(unsigned char)(col.y * lightScale),
 						(unsigned char)(col.z * lightScale));
@@ -293,7 +293,7 @@ void RayTracerWorld::RenderWorld(float elapsedSeconds)
 	p.SetAsPerspProj(cam.Info);
 	vp = Matrix4f::Multiply(p, v);
 	wvp = Matrix4f::Multiply(vp, w);
-	wvp = wvp.Inverse();
+	wvp = wvp.GetInverse();
 	topLeftScreen = wvp.Apply(Vector3f(-1, -1, 0));
 	topRightScreen = wvp.Apply(Vector3f(1, -1, 0));
 	bottomLeftScreen = wvp.Apply(Vector3f(-1, 1, 0));

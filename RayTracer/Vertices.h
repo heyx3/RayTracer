@@ -18,7 +18,7 @@ struct VertexPosColor
 	Vector3f Pos;
 	Vector3b Col;
 
-	VertexPosColor(Vector3f pos = Vector3f(), Vector3b color = Vector3b(1, 1, 1)) : Pos(pos), Col(color) { }
+	VertexPosColor(Vector3f pos = Vector3f(), Vector3b color = Vector3b(1.0f, 1.0f, 1.0f)) : Pos(pos), Col(color) { }
 
 	static void EnableAttributes(void);
 	static void DisableAttributes(void);
